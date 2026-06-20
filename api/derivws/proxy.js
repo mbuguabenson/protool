@@ -5,7 +5,7 @@ export default async function handler(req, res) {
         // Extract the subpath after /api/derivws/
         // E.g. /api/derivws/trading/v1/options/accounts -> trading/v1/options/accounts
         const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-        const subpath = urlObj.pathname.replace(/^\/api\/derivws\//, '');
+        const subpath = urlObj.pathname.replace(/^\/api\/derivws\//, '').replace(/^\//, '');
         
         const targetUrl = `https://api.derivws.com/${subpath}`;
         
