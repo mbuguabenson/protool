@@ -789,25 +789,22 @@ export default class RunPanelStore {
             this.is_sell_requested = false;
             this.setContractStage(contract_stages.CONTRACT_CLOSED);
 
-            // For special accounts, keep the bot running - don't unregister listeners
-            // This allows the bot to continue trading after each contract closes
+            // For contract close, update state but do not stop the bot immediately.
+            // The next bot action is decided by bot.trade_again or an explicit stop.
+            this.setHasOpenContract(false);
+            ui.setAccountSwitcherDisabledMessage();
+
             if (isSpecialAccount && this.is_running) {
                 console.log('[Run Panel] 🔄 Special account - keeping bot running after contract close');
-                // Don't unregister listeners - keep bot running
-                // Just update the contract stage and clear the open contract flag
-                ui.setAccountSwitcherDisabledMessage();
-                // Don't call self_exclusion.resetSelfExclusion() to keep bot running
-                // The bot will continue to the next trade automatically
+                // Keep listeners registered so the bot can continue to the next trade.
+                // Don't reset self exclusion because the bot is still active.
             } else {
-                // Normal behavior: stop the bot when contract closes
-                console.log('[Run Panel] 🛑 Normal account - stopping bot after contract close');
-                ui.setAccountSwitcherDisabledMessage();
-                this.unregisterBotListeners();
-                self_exclusion.resetSelfExclusion();
+                console.log('[Run Panel] ⏳ Normal account - deferring stop until trade_again or explicit stop');
+                // Keep listeners active until the bot emits trade_again or user stops it.
             }
+        } else {
+            this.setHasOpenContract(false);
         }
-
-        this.setHasOpenContract(false);
 
         summary_card.clearContractUpdateConfigValues();
 
@@ -826,14 +823,8 @@ export default class RunPanelStore {
             is_running: this.is_running,
         });
 
-        // For special accounts, don't stop the bot when it's ready
-        // This allows continuous trading
-        if (!isSpecialAccount) {
-            console.log('[Run Panel] 🛑 Normal account - stopping bot on ready');
-            this.setIsRunning(false);
-        } else {
-            console.log('[Run Panel] 🔄 Special account - keeping bot running on ready');
-        }
+        // bot_ready indicates the bot has subscribed to ticks/candles and is ready to proceed.
+        // It should not stop the bot automatically for normal accounts.
         observer.unregisterAll('bot.bot_ready');
     };
 
