@@ -111,21 +111,21 @@ const WorkspaceGroup = observer(() => {
                                 </span>
                             }
                         />
-                        <ToolbarIcon
-                            popover_message={localize('Profihub')}
-                            icon={
-                                <span
-                                    className='toolbar__icon'
-                                    id='db-toolbar__profihub-button'
-                                    data-testid='dt_toolbar_profihub_button'
-                                    onClick={() => setProfihubModalVisibility()}
-                                >
-                                    <LabelPairedChartLineMdRegularIcon />
-                                </span>
-                            }
-                        />
                     </>
                 )}
+                <ToolbarIcon
+                    popover_message={localize('Profihub')}
+                    icon={
+                        <span
+                            className='toolbar__icon'
+                            id='db-toolbar__profihub-button'
+                            data-testid='dt_toolbar_profihub_button'
+                            onClick={() => setProfihubModalVisibility()}
+                        >
+                            <LabelPairedChartLineMdRegularIcon />
+                        </span>
+                    }
+                />
                 <div className='vertical-divider' />
                 <ToolbarIcon
                     popover_message={localize('Undo')}
