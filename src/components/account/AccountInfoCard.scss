@@ -1,0 +1,252 @@
+.account-info-card {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 24px auto;
+    border-radius: 16px;
+    padding: 24px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.15);
+
+        .card-glass-glow {
+            opacity: 0.2;
+        }
+    }
+
+    &.is-demo {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
+        border-color: rgba(16, 185, 129, 0.15);
+        
+        .card-glass-glow {
+            background: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.35) 0%, transparent 50%);
+        }
+    }
+
+    &.is-real {
+        background: linear-gradient(135deg, rgba(255, 68, 79, 0.08) 0%, rgba(255, 82, 82, 0.03) 100%);
+        border-color: rgba(255, 68, 79, 0.15);
+
+        .card-glass-glow {
+            background: radial-gradient(circle at 80% 20%, rgba(255, 68, 79, 0.35) 0%, transparent 50%);
+        }
+    }
+
+    &.loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 160px;
+        color: rgba(255, 255, 255, 0.6);
+
+        .card-pulse-loader {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-color, #ff444f);
+            animation: card-spin 0.8s infinite linear;
+            margin-bottom: 12px;
+        }
+    }
+
+    .card-glass-glow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        opacity: 0.1;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .card-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-header-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .header-icon {
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            h3 {
+                margin: 0;
+                font-size: 15px;
+                font-weight: 600;
+                color: rgba(255, 255, 255, 0.85);
+                letter-spacing: 0.5px;
+            }
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+
+            &.demo-badge {
+                background: rgba(16, 185, 129, 0.15);
+                color: #10b981;
+                border: 1px solid rgba(16, 185, 129, 0.25);
+            }
+
+            &.real-badge {
+                background: rgba(255, 68, 79, 0.15);
+                color: #ff444f;
+                border: 1px solid rgba(255, 68, 79, 0.25);
+            }
+        }
+    }
+
+    .balance-display-section {
+        margin-bottom: 24px;
+
+        .balance-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .balance-amount {
+            font-size: 30px;
+            font-weight: 700;
+            margin: 0;
+            color: #ffffff;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+
+            .currency-symbol {
+                font-size: 22px;
+                color: rgba(255, 255, 255, 0.65);
+                margin-right: 2px;
+            }
+
+            .currency-code {
+                font-size: 15px;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 0.5);
+                margin-left: 8px;
+            }
+        }
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        padding-top: 20px;
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .detail-label {
+                font-size: 10px;
+                color: rgba(255, 255, 255, 0.35);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .detail-value {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 13.5px;
+                font-weight: 500;
+                color: rgba(255, 255, 255, 0.8);
+
+                .detail-icon {
+                    color: rgba(255, 255, 255, 0.35);
+                }
+
+                &.copyable {
+                    cursor: pointer;
+                    transition: color 0.2s ease;
+
+                    &:hover {
+                        color: #ffffff;
+
+                        .copy-action-btn {
+                            color: #ffffff;
+                        }
+                    }
+
+                    .copy-action-btn {
+                        background: none;
+                        border: none;
+                        padding: 0;
+                        margin: 0;
+                        color: rgba(255, 255, 255, 0.35);
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: color 0.2s ease;
+
+                        .success-icon {
+                            color: #10b981;
+                        }
+                    }
+                }
+
+                &.secure {
+                    .secure-icon {
+                        color: #10b981;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@keyframes card-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 480px) {
+    .account-info-card {
+        padding: 16px;
+
+        .balance-amount {
+            font-size: 24px;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+    }
+}

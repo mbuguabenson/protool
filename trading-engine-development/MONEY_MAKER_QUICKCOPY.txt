@@ -1,0 +1,117 @@
+═══════════════════════════════════════════════════════════════════════════════
+  MONEY MAKER TAB + AI FLOATING SCANNER - QUICK COPY CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: COPY CORE LIBRARY FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+From: lib/quantum-edge-engine.ts
+  To: your-app/lib/quantum-edge-engine.ts
+      [Handles: Over/Under, Even/Odd, Rise/Fall, Differs, Matches analysis]
+
+From: lib/ai-floating-scanner.ts
+  To: your-app/lib/ai-floating-scanner.ts
+      [Handles: AI consensus engine combining all strategies]
+
+STEP 2: COPY UI COMPONENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+From: components/tabs/money-maker-tab.tsx
+  To: your-app/components/tabs/money-maker-tab.tsx
+      [Main trading interface with 5 tabs]
+
+From: components/ai-floating-scanner.tsx
+  To: your-app/components/ai-floating-scanner.tsx
+      [Floating scanner window]
+
+STEP 3: VERIFY DEPENDENCIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ shadcn/ui badge component installed
+☐ shadcn/ui button component installed
+☐ shadcn/ui card component installed
+☐ shadcn/ui input component installed
+☐ shadcn/ui switch component installed
+☐ shadcn/ui tabs component installed
+☐ recharts installed (npm install recharts)
+
+STEP 4: INTEGRATE INTO YOUR APP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+In your main page/dashboard file (e.g., app/page.tsx):
+
+1. Add import:
+   import { MoneyMakerTab } from "@/components/tabs/money-maker-tab"
+
+2. Add to tabs list:
+   { id: "money-maker", label: "Money Maker", icon: TrendingUp }
+
+3. Add TabsContent:
+   <TabsContent value="money-maker">
+     <MoneyMakerTab theme={theme} recentDigits={tickHistory} />
+   </TabsContent>
+
+STEP 5: PROVIDE REQUIRED PROPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The tab needs:
+  • theme: "light" | "dark"           (your app's current theme)
+  • recentDigits: number[]            (recent digits 0-9, at least 60+ for analysis)
+  
+Example data flow:
+  const [tickHistory, setTickHistory] = useState<number[]>([])
+  
+  // Update as new ticks arrive from your trading API
+  useEffect(() => {
+    if (newTick) {
+      setTickHistory(prev => [...prev, newTick.digit])
+    }
+  }, [newTick])
+
+TOTAL FILES TO COPY: 4
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✓ 2 Library files (.ts)
+  ✓ 2 Component files (.tsx)
+
+DEPENDENCIES TO INSTALL: 1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  npm install recharts
+
+SHADCN COMPONENTS TO ADD: 6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  npx shadcn-ui@latest add badge button card input switch tabs
+
+STRATEGIES INCLUDED: 6
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Over/Under (0-4 vs 5-9)
+  2. Even/Odd (0,2,4,6,8 vs 1,3,5,7,9)
+  3. Rise/Fall (directional trend)
+  4. Differs (cold digits, rarely appearing)
+  5. Matches (hot digits, frequently appearing)
+  6. High/Low (7-9 vs 0-2)
+
+FEATURES INCLUDED: 10+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✓ Real-time multi-strategy analysis
+  ✓ AI consensus engine
+  ✓ Market heat indicators
+  ✓ Entry point detection
+  ✓ Power warnings
+  ✓ Tick skip recommendations
+  ✓ Transaction history
+  ✓ Recovery mode
+  ✓ 24H automated trading
+  ✓ Performance analytics
+  ✓ 5 trading tabs (Market Scanner, Console, Recovery, Smart24, Performance)
+  ✓ Floating AI scanner window
+
+NOTES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  • No modifications needed to library files
+  • Components work with light/dark theme
+  • Requires continuous digit data feed from trading API
+  • AI Scanner automatically analyzes all 6 strategies
+  • Compatible with existing Next.js/React apps
+  • Uses Recharts for chart visualization
+
+═══════════════════════════════════════════════════════════════════════════════

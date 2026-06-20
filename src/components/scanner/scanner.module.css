@@ -1,0 +1,28 @@
+/* scanner.module.css */
+
+.scannerContainer {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    color: #fff;
+}
+
+.header {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-align: center;
+    color: #fff;
+}
+
+.title {
+    margin: 0;
+}

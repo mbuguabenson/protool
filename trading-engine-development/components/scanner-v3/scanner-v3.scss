@@ -1,0 +1,577 @@
+// AI Signal Scanner 3.0 — Enhanced with Entry Points & Over/Under Analysis
+
+// Colors and theme configurations
+:root {
+    --bg-dark-panel: rgba(10, 18, 44, 0.95);
+    --border-gold-glow: rgba(245, 197, 66, 0.35);
+    --gold-accent: #f5c542;
+    --buy-green: #00c853;
+    --sell-red: #ff3d00;
+    --neutral-blue: #00b0ff;
+    --track-bg: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.06);
+}
+
+.scanner-v3 {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    padding: 1.6rem;
+    box-sizing: border-box;
+    overflow-y: auto;
+    gap: 1.6rem;
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+        width: 0.6rem;
+        height: 0.6rem;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(245, 197, 66, 0.25);
+        border-radius: 0.3rem;
+        &:hover {
+            background: rgba(245, 197, 66, 0.45);
+        }
+    }
+
+    &.floating-view {
+        padding: 1.2rem;
+        gap: 1.2rem;
+        font-size: 1.2rem;
+
+        .scanner-v3__params-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+}
+
+// ── Dropdowns & Form Fields ──────────────────────────────────────────
+.scanner-v3__header {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.2rem;
+    padding: 1.2rem;
+}
+
+.scanner-v3__field-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.2rem;
+    align-items: flex-end;
+}
+
+.scanner-v3__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    text-align: left;
+
+    label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05rem;
+        color: rgba(255, 255, 255, 0.65);
+    }
+}
+
+.scanner-v3__input {
+    background: rgb(15, 27, 66);
+    border: 1.5px solid var(--border-gold-glow);
+    color: #ffffff;
+    padding: 0.8rem 1.2rem;
+    border-radius: 0.8rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+    outline: none;
+    transition: all 0.2s ease;
+    height: 3.8rem;
+    box-sizing: border-box;
+
+    &:focus,
+    &:hover {
+        border-color: var(--gold-accent);
+        box-shadow: 0 0 10px rgba(245, 197, 66, 0.25);
+    }
+
+    option {
+        background: rgb(8, 14, 36);
+        color: #ffffff;
+    }
+}
+
+// Multi-market Toggle Buttons
+.multimarket-toggle-container {
+    display: flex;
+    background: rgb(15, 27, 66);
+    border: 1.5px solid var(--border-gold-glow);
+    border-radius: 0.8rem;
+    overflow: hidden;
+    height: 3.8rem;
+    box-sizing: border-box;
+}
+
+.multimarket-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+        background: var(--gold-accent);
+        color: rgb(8, 14, 36);
+        font-weight: 700;
+    }
+
+    &:hover:not(.active) {
+        color: #ffffff;
+        background: rgba(245, 197, 66, 0.1);
+    }
+}
+
+// ── Trade Parameters Section ─────────────────────────────────────────
+.scanner-v3__params-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.2rem;
+    padding: 1.2rem;
+
+    h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0 0 1rem;
+        color: var(--gold-accent);
+        text-align: left;
+    }
+}
+
+.scanner-v3__params-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+}
+
+// ── Action (Scan) Buttons ────────────────────────────────────────────
+.scanner-v3__action-row {
+    display: flex;
+}
+
+.scanner-v3__scan-btn {
+    width: 100%;
+    height: 4.4rem;
+    background: linear-gradient(135deg, rgb(25, 41, 92) 0%, rgb(15, 25, 61) 100%);
+    border: 1.5px solid var(--gold-accent);
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(245, 197, 66, 0.15);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(245, 197, 66, 0.35);
+        background: linear-gradient(135deg, rgb(35, 57, 122) 0%, rgb(20, 35, 81) 100%);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .scanner-loader {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+}
+
+.animate-spin {
+    width: 1.6rem;
+    height: 1.6rem;
+    animation: spin 1s linear infinite;
+
+    circle {
+        stroke-dasharray: 42;
+        stroke-dashoffset: 14;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ── Results List ─────────────────────────────────────────────────────
+.scanner-v3__results-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.2rem;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+
+    h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--gold-accent);
+    }
+}
+
+.scanner-v3__results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-height: 36rem;
+    overflow-y: auto;
+    padding-right: 0.4rem;
+
+    &::-webkit-scrollbar {
+        width: 0.4rem;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.2rem;
+    }
+}
+
+// Individual Result Card
+.scanner-v3__result-card {
+    background: rgba(15, 27, 66, 0.5);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.8rem;
+    padding: 1.2rem;
+    transition: all 0.25s ease;
+    cursor: pointer;
+
+    &:hover {
+        border-color: rgba(245, 197, 66, 0.3);
+        background: rgba(15, 27, 66, 0.8);
+        transform: scale(0.99);
+    }
+
+    &.best-signal {
+        border-color: rgba(245, 197, 66, 0.6);
+        box-shadow: 0 0 12px rgba(245, 197, 66, 0.1) inset;
+        background: rgba(245, 197, 66, 0.03);
+
+        &:hover {
+            border-color: var(--gold-accent);
+            background: rgba(245, 197, 66, 0.06);
+        }
+    }
+}
+
+.result-card__main-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.result-card__left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.result-card__market-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.result-card__price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.result-card__right {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.result-card__signal-block {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.result-card__signal-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+
+    &.buy {
+        color: var(--buy-green);
+        text-shadow: 0 0 10px rgba(0, 200, 83, 0.2);
+    }
+    &.sell {
+        color: var(--sell-red);
+        text-shadow: 0 0 10px rgba(255, 61, 0, 0.2);
+    }
+    &.neutral {
+        color: var(--neutral-blue);
+    }
+}
+
+.result-card__confidence {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.4rem;
+    display: inline-block;
+}
+
+// ── Entry Points & Analysis Details (Expanded Panel) ──────────────────
+.result-card__details-panel {
+    margin-top: 1.2rem;
+    padding-top: 1.2rem;
+    border-top: 1.5px dashed rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-card__stats-summary {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 0.8rem 1rem;
+    border-radius: 0.6rem;
+    border-left: 3px solid var(--border-gold-glow);
+}
+
+.entry-point-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0.8rem;
+    padding: 1rem;
+}
+
+.entry-point__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.entry-point__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.entry-point__strength-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03rem;
+
+    &.strong {
+        background: rgba(0, 200, 83, 0.15);
+        color: var(--buy-green);
+        border: 1px solid rgba(0, 200, 83, 0.3);
+    }
+    &.moderate {
+        background: rgba(245, 197, 66, 0.15);
+        color: var(--gold-accent);
+        border: 1px solid rgba(245, 197, 66, 0.3);
+    }
+    &.weak {
+        background: rgba(255, 61, 0, 0.12);
+        color: var(--sell-red);
+        border: 1px solid rgba(255, 61, 0, 0.25);
+    }
+}
+
+.entry-point__trend-badge {
+    padding: 0.2rem 0.6rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 0.4rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.entry-point__desc {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.35;
+}
+
+// ── Over/Under Deep Prediction List ──────────────────────────────────
+.overunder-prediction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.overunder-row {
+    display: grid;
+    grid-template-columns: 8rem 1fr 5rem;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.1rem;
+}
+
+.overunder-label {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.overunder-bar-container {
+    height: 0.8rem;
+    background: var(--track-bg);
+    border-radius: 0.4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.overunder-bar {
+    height: 100%;
+    border-radius: 0.4rem;
+    transition: width 0.3s ease;
+
+    &.positive-edge {
+        background: var(--buy-green);
+    }
+    &.negative-edge {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+.overunder-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--gold-accent);
+    opacity: 0.85;
+}
+
+.overunder-stats {
+    text-align: right;
+    font-weight: 700;
+
+    &.positive-edge {
+        color: var(--buy-green);
+    }
+    &.negative-edge {
+        color: rgba(255, 255, 255, 0.4);
+    }
+}
+
+// ── Bottom Download Bot CTA ──────────────────────────────────────────
+.scanner-v3__bot-cta {
+    background: linear-gradient(135deg, rgba(245, 197, 66, 0.08) 0%, rgba(245, 197, 66, 0.01) 100%);
+    border: 1.5px solid var(--border-gold-glow);
+    border-radius: 1.2rem;
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    text-align: left;
+}
+
+.bot-cta__header {
+    h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--gold-accent);
+        margin: 0 0 0.4rem;
+    }
+    p {
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.55);
+        margin: 0;
+        line-height: 1.35;
+    }
+}
+
+.bot-cta__btn {
+    width: 100%;
+    height: 4rem;
+    background: var(--gold-accent);
+    color: rgb(8, 14, 36);
+    border: none;
+    font-size: 1.3rem;
+    font-weight: 750;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(245, 197, 66, 0.2);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+
+    &:hover:not(:disabled) {
+        background: #ffe082;
+        box-shadow: 0 6px 20px rgba(245, 197, 66, 0.4);
+        transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}

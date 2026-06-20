@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "deriv api": {
+            "url": "https://mcp-api.deriv.com/mcp",
+            "name": "Deriv API"
+        }
+    }
+}
