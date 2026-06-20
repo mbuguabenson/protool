@@ -22,15 +22,17 @@ export default async function handler(req, res) {
         const access_token = cookies.deriv_access_token;
         const app_id = cookies.deriv_app_id || process.env.DERIV_LEGACY_APP_ID;
         const stored_selected_loginid = cookies.deriv_selected_loginid;
+        const finalAppId = app_id || process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
 
         if (!access_token) {
-            return res.status(200).json({ logged_in: false, app_id: app_id || null });
+            return res.status(200).json({ logged_in: false, app_id: finalAppId });
         }
 
         const account_headers = {
             Authorization: `Bearer ${access_token}`,
             'Content-Type': 'application/json',
-            ...(app_id ? { 'X-APP-ID': app_id } : {}),
+            'Deriv-App-ID': finalAppId,
+            'X-APP-ID': finalAppId,
         };
 
         let accounts = [];

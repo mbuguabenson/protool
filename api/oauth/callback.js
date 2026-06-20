@@ -84,10 +84,8 @@ export default async function handler(req, res) {
                 `deriv_token_expires=${Date.now() + Number(tokenData.expires_in) * 1000}; ${cookieOpts.join('; ')}`
             );
 
-        const app_id = process.env.DERIV_LEGACY_APP_ID;
-        if (app_id) {
-            setCookies.push(`deriv_app_id=${encodeURIComponent(app_id)}; ${cookieOpts.join('; ')}`);
-        }
+        const finalAppId = process.env.DERIV_LEGACY_APP_ID || process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
+        setCookies.push(`deriv_app_id=${encodeURIComponent(finalAppId)}; ${cookieOpts.join('; ')}`);
 
         setCookies.push(`oauth_code_verifier=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`);
         setCookies.push(`oauth_state=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`);
@@ -103,7 +101,8 @@ export default async function handler(req, res) {
             const accountHeaders = {
                 Authorization: `Bearer ${tokenData.access_token}`,
                 'Content-Type': 'application/json',
-                ...(app_id ? { 'X-APP-ID': app_id } : {}),
+                'Deriv-App-ID': finalAppId,
+                'X-APP-ID': finalAppId,
             };
 
             const preferredAccount = cookies.oauth_preferred_account;
