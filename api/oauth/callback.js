@@ -116,7 +116,7 @@ export default async function handler(req, res) {
 
                 if (accountResponse && accountResponse.ok) {
                     const accountData = await accountResponse.json();
-                    const rawAccounts = accountData.accounts || accountData.trading_accounts || [];
+                    const rawAccounts = accountData.data || accountData.accounts || accountData.trading_accounts || [];
                     accounts = rawAccounts
                         .map(account => ({
                             loginid: account.account_id || account.loginid || account.login_id || '',

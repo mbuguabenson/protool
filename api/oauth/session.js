@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
             if (tradingResponse.ok) {
                 const tradingData = await tradingResponse.json();
-                const tradingAccounts = tradingData.accounts || tradingData.trading_accounts || [];
+                const tradingAccounts = tradingData.data || tradingData.accounts || tradingData.trading_accounts || [];
                 accounts = tradingAccounts
                     .map(account => ({
                         loginid: account.account_id || account.loginid || account.login_id || '',
