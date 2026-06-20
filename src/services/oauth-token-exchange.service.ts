@@ -1,4 +1,5 @@
 import { clearCodeVerifier, getAuthRedirectUri, getCodeVerifier, isProduction } from '@/components/shared';
+import { getConfiguredClientId } from '@/components/shared/utils/config/config';
 import brandConfig from '@/components/shared/brand.config.json';
 
 /**
@@ -92,13 +93,9 @@ export class OAuthTokenExchangeService {
                 };
             }
 
-            const clientId =
-                process.env.CLIENT_ID ||
-                process.env.DERIV_OAUTH_CLIENT_ID ||
-                process.env.OAUTH_CLIENT_ID ||
-                process.env.DERIV_LEGACY_APP_ID;
+            const clientId = getConfiguredClientId();
             if (!clientId) {
-                console.error('OAuth: CLIENT_ID environment variable is not set');
+                console.error('OAuth: client ID is not configured in brand config, local storage, or env aliases');
                 return {
                     error: 'invalid_client',
                     error_description: 'CLIENT_ID not configured',
