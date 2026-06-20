@@ -41,7 +41,29 @@ export default async function handler(req, res) {
         });
 
         const text = await response.text();
-        const tokenData = text ? JSON.parse(text) : {};
+        console.log('Deriv token exchange response', {
+            status: response.status,
+            statusText: response.statusText,
+            text: text ? text.slice(0, 2000) : '',
+        });
+
+        let tokenData = {};
+        if (text) {
+            try {
+                tokenData = JSON.parse(text);
+            } catch (parseError) {
+                console.error('Deriv token exchange response is not valid JSON', {
+                    parseError: parseError instanceof Error ? parseError.message : String(parseError),
+                    rawText: text.slice(0, 2000),
+                });
+                return res.status(response.status).json({
+                    error: 'invalid_json_response',
+                    error_description: 'Deriv token endpoint returned non-JSON response',
+                    raw_response: text,
+                });
+            }
+        }
+
         const isProd = process.env.NODE_ENV === 'production';
         const cookieOpts = ['HttpOnly', 'Path=/', 'SameSite=Lax'];
         if (isProd) {
