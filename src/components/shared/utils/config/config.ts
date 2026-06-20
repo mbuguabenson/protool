@@ -218,7 +218,7 @@ export const clearCSRFToken = () => {
 };
 
 export const getAuthRedirectUri = () => {
-    const configuredRedirectUri =
+    const envRedirectUri =
         process.env.DERIV_REDIRECT_URI ||
         process.env.DERIV_OAUTH_REDIRECT_URI ||
         process.env.REDIRECT_URI ||
@@ -226,11 +226,20 @@ export const getAuthRedirectUri = () => {
         process.env.REACT_APP_REDIRECT_URI ||
         process.env.REACT_APP_OAUTH_REDIRECT_URI ||
         process.env.VITE_REDIRECT_URI ||
-        process.env.VITE_OAUTH_REDIRECT_URI ||
-        (brandConfig.oauth?.redirect_uri ? String(brandConfig.oauth.redirect_uri) : '');
+        process.env.VITE_OAUTH_REDIRECT_URI;
 
-    if (configuredRedirectUri) {
-        return configuredRedirectUri;
+    if (envRedirectUri) {
+        return envRedirectUri;
+    }
+
+    if (isLocal() || isTestLink()) {
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        return `${protocol}//${host}/callback`;
+    }
+
+    if (brandConfig.oauth?.redirect_uri) {
+        return String(brandConfig.oauth.redirect_uri);
     }
 
     const protocol = window.location.protocol;

@@ -5,6 +5,11 @@
         "basePath": "/xml-uploads/"
     },
     {
+        "name": "AUTOTRADER",
+        "file": "AUTOTRADER.xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
         "name": "AUTO_C4_VOLT_🇬🇧_2_🇬🇧_AI_PREMIUM_ROBOT_(2)_(1)_1765711647660",
         "file": "AUTO_C4_VOLT_🇬🇧_2_🇬🇧_AI_PREMIUM_ROBOT_(2)_(1)_1765711647660.xml",
         "basePath": "/xml-uploads/"
@@ -35,6 +40,46 @@
         "basePath": "/xml-uploads/"
     },
     {
+        "name": "LAS VEGAS 💵💵 PRO ENGLISH.",
+        "file": "LAS VEGAS 💵💵 PRO ENGLISH..xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
+        "name": "OVER UNDER AUTO SWITCHER",
+        "file": "OVER UNDER AUTO SWITCHER.xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
+        "name": "OVER UNDER AUTOMATIC X ",
+        "file": "OVER UNDER AUTOMATIC X .xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
+        "name": "PROFITHUB PREMIUM A.I",
+        "file": "PROFITHUB PREMIUM A.I.xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
+        "name": "PROFITHUB RISE FALL AUTO",
+        "file": "PROFITHUB RISE FALL AUTO.xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
+        "name": "Profithub Speedbot",
+        "file": "Profithub Speedbot.xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
+        "name": "PROFITHUB UNDER 8 OVER 3 AUTO",
+        "file": "PROFITHUB UNDER 8 OVER 3 AUTO.xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
+        "name": "RISE AND FALL AUTOMATIC X ",
+        "file": "RISE AND FALL AUTOMATIC X .xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
         "name": "RISE AND FALL GURU",
         "file": "RISE AND FALL GURU.xml",
         "basePath": "/xml-uploads/"
@@ -42,6 +87,11 @@
     {
         "name": "WIZARD AI BOT",
         "file": "WIZARD AI BOT.xml",
+        "basePath": "/xml-uploads/"
+    },
+    {
+        "name": "🤑UNSTOPPABLE DIFFER BOT🤑",
+        "file": "🤑UNSTOPPABLE DIFFER BOT🤑.xml",
         "basePath": "/xml-uploads/"
     }
 ]

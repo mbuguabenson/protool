@@ -36,7 +36,11 @@ export default async function handler(req, res) {
         }
 
         const client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.DERIV_LEGACY_APP_ID;
-        const redirect_uri = process.env.DERIV_REDIRECT_URI;
+        const redirect_uri =
+            process.env.DERIV_REDIRECT_URI ||
+            (req.headers.host
+                ? `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}/api/oauth/callback`
+                : null);
 
         if (!client_id || !redirect_uri) {
             return res.status(500).send('Server not configured for OAuth');

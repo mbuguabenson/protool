@@ -8,12 +8,20 @@
             "config": {
                 "distDir": "dist"
             }
+        },
+        {
+            "src": "api/**/*.js",
+            "use": "@vercel/node"
         }
     ],
     "routes": [
         {
             "src": "/api/derivws/(.*)",
             "dest": "/api/derivws/proxy.js"
+        },
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/$1.js"
         },
         {
             "handle": "filesystem"

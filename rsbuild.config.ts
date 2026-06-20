@@ -88,6 +88,12 @@ export default defineConfig({
         compress: true,
         historyApiFallback: true, // Enable client-side routing fallback
         https: false, // Disable HTTPS for easier local access
+        proxy: {
+            '/api': {
+                target: 'http://localhost:3001',
+                changeOrigin: true,
+            },
+        },
     },
     dev: {
         hmr: true,
