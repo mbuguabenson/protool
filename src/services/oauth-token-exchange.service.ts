@@ -107,6 +107,7 @@ export class OAuthTokenExchangeService {
             // Call the server-side token exchange endpoint
             const response = await fetch('/api/token', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     code,
