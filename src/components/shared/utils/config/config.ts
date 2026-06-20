@@ -309,7 +309,7 @@ export const forceUpdateAppId = () => {
 };
 
 export const getAppId = () => {
-    const configured_app_id = getConfiguredAppId();
+    const configured_app_id = getConfiguredAppId() || getConfiguredClientId();
 
     if (configured_app_id) {
         window.localStorage.setItem('configured_app_id', configured_app_id.toString());
