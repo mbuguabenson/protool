@@ -22,7 +22,6 @@ const useActiveAccount = ({ allBalanceData }: { allBalanceData: Balance | null }
         if (showAsCR) {
             const crAccount = accountList?.find(account => account.loginid === showAsCR);
             if (crAccount) {
-                console.log('[useActiveAccount] 🎯 Using CR account for display:', showAsCR);
                 return crAccount;
             }
         }
@@ -34,13 +33,6 @@ const useActiveAccount = ({ allBalanceData }: { allBalanceData: Balance | null }
     const balanceLookupLoginId = showAsCR || activeAccount?.loginid;
     const currentBalanceData = allBalanceData?.accounts?.[balanceLookupLoginId ?? ''];
 
-    console.log('[useActiveAccount] Balance lookup:', {
-        showAsCR,
-        balanceLookupLoginId,
-        activeAccountLoginId: activeAccount?.loginid,
-        hasBalanceData: !!currentBalanceData,
-        balance: currentBalanceData?.balance,
-    });
 
     const modifiedAccount = useMemo(() => {
         if (!activeAccount) return undefined;

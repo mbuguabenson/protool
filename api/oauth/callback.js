@@ -175,7 +175,7 @@ export default async function handler(req, res) {
             account_id: selectedAccount?.loginid || null,
             account_type: selectedAccount?.account_type || null,
             currency: selectedCurrency || null,
-            app_id: app_id || null,
+            app_id: finalAppId || null,
             client_id: client_id || null,
             accounts,
         };

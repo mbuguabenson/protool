@@ -117,6 +117,28 @@ export const prefetchAllXmlInBackground = async (files: string[]) => {
     }
 };
 
+const fetchJsonManifest = async (url: string): Promise<TBotsManifestItem[] | null> => {
+    try {
+        const res = await fetch(url, { cache: 'force-cache' });
+        if (!res.ok) return null;
+
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('text/html') || contentType.includes('application/xhtml+xml')) {
+            return null;
+        }
+
+        const text = await res.text();
+        const trimmed = text.trim();
+        if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) {
+            return null;
+        }
+
+        return JSON.parse(trimmed) as TBotsManifestItem[];
+    } catch {
+        return null;
+    }
+};
+
 export const getBotsManifest = async (): Promise<TBotsManifestItem[] | null> => {
     try {
         const hostname = window.location.hostname.toLowerCase();
@@ -125,19 +147,15 @@ export const getBotsManifest = async (): Promise<TBotsManifestItem[] | null> => 
         const domain = (override || hostname).replace(/^www\./, '');
 
         // Try domain-specific manifest first
-        let res = await fetch(`/xml/${encodeURIComponent(domain)}/bots.json`, { cache: 'force-cache' });
-        if (!res.ok) {
-            // Fallback to default manifest when generic /xml/bots.json is not available
-            res = await fetch('/xml/default/bots.json', { cache: 'force-cache' });
-        }
-        if (!res.ok) return null;
-
-        const data = (await res.json()) as TBotsManifestItem[];
-
-        // If we loaded a domain-specific file, set base for XML fetches
-        if (res.url.includes(`/${domain}/bots.json`)) {
+        const domainUrl = `/xml/${encodeURIComponent(domain)}/bots.json`;
+        let data = await fetchJsonManifest(domainUrl);
+        
+        if (data) {
             setXmlBase(`/xml/${domain}/`);
         } else {
+            // Fallback to default manifest when generic /xml/bots.json is not available
+            const defaultUrl = '/xml/default/bots.json';
+            data = await fetchJsonManifest(defaultUrl);
             setXmlBase('/xml/default/');
         }
 
@@ -151,9 +169,8 @@ export const getBotsManifest = async (): Promise<TBotsManifestItem[] | null> => 
 
 export const getXmlUploadsManifest = async (): Promise<TBotsManifestItem[] | null> => {
     try {
-        const res = await fetch('/xml-uploads/bots.json', { cache: 'force-cache' });
-        if (!res.ok) return null;
-        const data = (await res.json()) as TBotsManifestItem[];
+        const data = await fetchJsonManifest('/xml-uploads/bots.json');
+        if (!data) return null;
         return data.map(item => ({ ...item, basePath: '/xml-uploads/' }));
     } catch (e) {
         // eslint-disable-next-line no-console
