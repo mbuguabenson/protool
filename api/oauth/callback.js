@@ -35,21 +35,26 @@ export default async function handler(req, res) {
             return res.status(400).send('Invalid state');
         }
 
-        const client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.DERIV_LEGACY_APP_ID;
+        const oauth_client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
+        const legacy_app_id = process.env.DERIV_LEGACY_APP_ID || process.env.APP_ID || '113555';
+
         const redirect_uri =
             process.env.DERIV_REDIRECT_URI ||
             (req.headers.host
                 ? `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}/api/oauth/callback`
                 : null);
 
-        if (!client_id || !redirect_uri) {
+        if (!oauth_client_id || !redirect_uri) {
+            console.error('[Callback] Missing OAuth client ID or redirect URI configuration');
             return res.status(500).send('Server not configured for OAuth');
         }
+
+        console.log('[Callback] Initiating token exchange. OAuth Client ID:', oauth_client_id, 'Redirect URI:', redirect_uri);
 
         const params = new URLSearchParams({
             grant_type: 'authorization_code',
             code,
-            client_id,
+            client_id: oauth_client_id,
             redirect_uri,
             code_verifier,
         });
@@ -63,8 +68,11 @@ export default async function handler(req, res) {
         const tokenData = await tokenResp.json();
 
         if (!tokenResp.ok) {
+            console.error('[Callback] Token exchange failed:', tokenResp.status, tokenData);
             return res.status(500).json({ error: 'token_exchange_failed', details: tokenData });
         }
+
+        console.log('[Callback] Token exchange successful. Access token scope:', tokenData.scope);
 
         const isProd = process.env.NODE_ENV === 'production';
         const cookieOpts = [`HttpOnly`, `Path=/`, `SameSite=Lax`];
@@ -84,8 +92,8 @@ export default async function handler(req, res) {
                 `deriv_token_expires=${Date.now() + Number(tokenData.expires_in) * 1000}; ${cookieOpts.join('; ')}`
             );
 
-        const finalAppId = process.env.DERIV_LEGACY_APP_ID || process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
-        setCookies.push(`deriv_app_id=${encodeURIComponent(finalAppId)}; ${cookieOpts.join('; ')}`);
+        // Store legacy App ID in the deriv_app_id cookie so bot-skeleton uses it for legacy WS connections
+        setCookies.push(`deriv_app_id=${encodeURIComponent(legacy_app_id)}; ${cookieOpts.join('; ')}`);
 
         setCookies.push(`oauth_code_verifier=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`);
         setCookies.push(`oauth_state=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`);
@@ -101,14 +109,15 @@ export default async function handler(req, res) {
             const accountHeaders = {
                 Authorization: `Bearer ${tokenData.access_token}`,
                 'Content-Type': 'application/json',
-                'Deriv-App-ID': finalAppId,
-                'X-APP-ID': finalAppId,
+                'Deriv-App-ID': oauth_client_id,
+                'X-APP-ID': oauth_client_id,
             };
 
             const preferredAccount = cookies.oauth_preferred_account;
 
             // Try to fetch new wallet accounts (DOT, ROT) using trading API
             try {
+                console.log('[Callback] Fetching options accounts from api.derivws.com...');
                 const accountResponse = await fetch('https://api.derivws.com/trading/v1/options/accounts', {
                     headers: accountHeaders,
                 }).catch(() => null);
@@ -116,6 +125,7 @@ export default async function handler(req, res) {
                 if (accountResponse && accountResponse.ok) {
                     const accountData = await accountResponse.json();
                     const rawAccounts = accountData.data || accountData.accounts || accountData.trading_accounts || [];
+                    console.log('[Callback] Options accounts fetched. Raw count:', rawAccounts.length);
                     accounts = rawAccounts
                         .map(account => ({
                             loginid: account.account_id || account.loginid || account.login_id || '',
@@ -125,6 +135,9 @@ export default async function handler(req, res) {
                             balance: account.balance ?? null,
                         }))
                         .filter(account => account.loginid);
+                } else if (accountResponse) {
+                    const errText = await accountResponse.text().catch(() => '');
+                    console.error('[Callback] Failed to fetch options accounts. Response:', errText);
                 }
 
                 // Auto-create demo options account if none found

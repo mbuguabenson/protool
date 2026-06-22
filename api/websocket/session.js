@@ -70,9 +70,10 @@ export default async function handler(req, res) {
         // Get cookies
         const cookies = parseCookies(req.headers.cookie || '');
         const accessToken = cookies.deriv_access_token;
-        const appId = cookies.deriv_app_id || process.env.DERIV_LEGACY_APP_ID;
+        const oauth_client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
 
         if (!accessToken) {
+            console.warn('[WS] Unauthorized access attempt: no access token cookie');
             return res.status(401).json({
                 error: 'unauthorized',
                 error_description: 'No access token found',
@@ -97,8 +98,8 @@ export default async function handler(req, res) {
             });
         }
 
-        // Create OTP session
-        const sessionData = await createWebSocketSession(accessToken, account_id, appId);
+        // Create OTP session using OAuth Client ID
+        const sessionData = await createWebSocketSession(accessToken, account_id, oauth_client_id);
 
         // Set session cookie if needed
         const sessionCookie = `ws_session_${account_id}=${encodeURIComponent(
