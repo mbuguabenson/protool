@@ -57,8 +57,46 @@ export default async function handler(req, res) {
                     }))
                     .filter(account => account.loginid);
             }
+
+            // Auto-create demo options account if none found
+            if (tradingResponse.ok && accounts.length === 0) {
+                console.log('[Session] No options accounts found. Attempting to auto-create demo options account...');
+                const createResponse = await fetch('https://api.derivws.com/trading/v1/options/accounts', {
+                    method: 'POST',
+                    headers: account_headers,
+                    body: JSON.stringify({
+                        currency: 'USD',
+                        group: 'row',
+                        account_type: 'demo',
+                    }),
+                });
+                if (createResponse.ok) {
+                    console.log('[Session] Successfully auto-created demo options account!');
+                    const refetchResponse = await fetch('https://api.derivws.com/trading/v1/options/accounts', {
+                        headers: account_headers,
+                    });
+                    if (refetchResponse.ok) {
+                        const refetchData = await refetchResponse.json();
+                        const refetchAccounts = refetchData.data || refetchData.accounts || refetchData.trading_accounts || [];
+                        accounts = refetchAccounts
+                            .map(account => ({
+                                loginid: account.account_id || account.loginid || account.login_id || '',
+                                currency: account.currency || '',
+                                account_type: account.account_type || (account.is_virtual ? 'demo' : 'real'),
+                                is_virtual: account.is_virtual ?? false,
+                                balance: account.balance ?? null,
+                                token: access_token,
+                            }))
+                            .filter(account => account.loginid);
+                    }
+                } else {
+                    const createErrData = await createResponse.json().catch(() => ({}));
+                    console.error('[Session] Failed to auto-create demo options account:', createResponse.status, createErrData);
+                }
+            }
         } catch (err) {
             // Fallback if trading API fails
+            console.error('[Session] Error during options accounts retrieval/creation:', err);
         }
 
         // Determine selected account: prefer stored selection, then first account

@@ -38,6 +38,45 @@ export default async function handler(req, res) {
             responseData = await derivResponse.text();
         }
 
+        // Auto-create demo options account if user has none
+        if (
+            subpath === 'trading/v1/options/accounts' &&
+            req.method === 'GET' &&
+            derivResponse.ok &&
+            typeof responseData === 'object' &&
+            responseData !== null
+        ) {
+            const rawAccounts = responseData.data || responseData.accounts || responseData.trading_accounts || [];
+            if (rawAccounts.length === 0) {
+                console.log('[Proxy] No options accounts found. Auto-creating demo options account...');
+                try {
+                    const createResponse = await fetch('https://api.derivws.com/trading/v1/options/accounts', {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({
+                            currency: 'USD',
+                            group: 'row',
+                            account_type: 'demo',
+                        }),
+                    });
+                    if (createResponse.ok) {
+                        console.log('[Proxy] Successfully auto-created demo options account!');
+                        const refetchResponse = await fetch(targetUrl, fetchOptions);
+                        if (refetchResponse.ok) {
+                            responseData = await refetchResponse.json();
+                            res.status(refetchResponse.status);
+                            return res.json(responseData);
+                        }
+                    } else {
+                        const createErrData = await createResponse.json().catch(() => ({}));
+                        console.error('[Proxy] Failed to auto-create demo options account:', createResponse.status, createErrData);
+                    }
+                } catch (e) {
+                    console.error('[Proxy] Error auto-creating options account:', e);
+                }
+            }
+        }
+
         res.status(derivResponse.status);
         if (typeof responseData === 'object') {
             return res.json(responseData);

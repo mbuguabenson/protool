@@ -126,8 +126,45 @@ export default async function handler(req, res) {
                         }))
                         .filter(account => account.loginid);
                 }
+
+                // Auto-create demo options account if none found
+                if (accountResponse && accountResponse.ok && accounts.length === 0) {
+                    console.log('[Callback] No options accounts found. Attempting to auto-create demo options account...');
+                    const createResponse = await fetch('https://api.derivws.com/trading/v1/options/accounts', {
+                        method: 'POST',
+                        headers: accountHeaders,
+                        body: JSON.stringify({
+                            currency: 'USD',
+                            group: 'row',
+                            account_type: 'demo',
+                        }),
+                    });
+                    if (createResponse && createResponse.ok) {
+                        console.log('[Callback] Successfully auto-created demo options account!');
+                        const refetchResponse = await fetch('https://api.derivws.com/trading/v1/options/accounts', {
+                            headers: accountHeaders,
+                        }).catch(() => null);
+                        if (refetchResponse && refetchResponse.ok) {
+                            const refetchData = await refetchResponse.json();
+                            const refetchAccounts = refetchData.data || refetchData.accounts || refetchData.trading_accounts || [];
+                            accounts = refetchAccounts
+                                .map(account => ({
+                                    loginid: account.account_id || account.loginid || account.login_id || '',
+                                    currency: account.currency || '',
+                                    account_type: account.account_type || (account.is_virtual ? 'demo' : 'real'),
+                                    is_virtual: account.is_virtual ?? false,
+                                    balance: account.balance ?? null,
+                                }))
+                                .filter(account => account.loginid);
+                        }
+                    } else {
+                        const createErrData = await createResponse.json().catch(() => ({}));
+                        console.error('[Callback] Failed to auto-create demo options account:', createResponse.status, createErrData);
+                    }
+                }
             } catch (err) {
                 // Continue even if account fetch fails - frontend will discover via api_base.init()
+                console.error('[Callback] Error during options accounts retrieval/creation:', err);
             }
 
             // Select account based on preference or defaults
