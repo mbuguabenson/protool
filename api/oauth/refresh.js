@@ -124,7 +124,7 @@ export default async function handler(req, res) {
             token_type: tokenData.token_type || 'Bearer',
             expires_in: expires_in,
             expires_at: expires_at,
-            scope: tokenData.scope || 'trade',
+            scope: tokenData.scope || 'trade account_manage',
         });
     } catch (err) {
         console.error('Token refresh error:', err);
