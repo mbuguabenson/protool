@@ -113,9 +113,24 @@ class DelegatingWebSocket {
 let currentConnectionAppId = null;
 const APP_ID_SWITCHING_DISABLED = true;
 
+// New Deriv Trading API public WebSocket endpoint (no app_id needed - OIDC path)
+const DERIVWS_PUBLIC_WS = 'wss://api.derivws.com/trading/v1/options/ws/public';
+
 /**
- * Generate a Deriv API instance with a specific app_id
- * @param {number} specificAppId - Optional specific app_id to use. If not provided, uses getAppId()
+ * Detect if the current auth token is an OIDC JWT (not a legacy short token).
+ * OIDC JWTs always start with 'eyJ'. Legacy tokens are short alphanumeric strings.
+ */
+const isOidcSession = () => {
+    const storedToken = localStorage.getItem('authToken') || '';
+    return storedToken.startsWith('eyJ');
+};
+
+/**
+ * Generate a Deriv API instance.
+ * - OIDC JWT users: connects directly to the modern api.derivws.com public WebSocket
+ *   (no legacy app_id required). The OTP switch upgrades it to an authenticated URL.
+ * - Legacy token users: connects to the traditional ws.derivws.com endpoint with app_id.
+ * @param {number} specificAppId - Optional specific app_id to use for legacy connections.
  */
 export const generateDerivApiInstance = (specificAppId = null) => {
     const cleanedServer = getSocketURL().replace(/[^a-zA-Z0-9.]/g, '');
@@ -126,20 +141,28 @@ export const generateDerivApiInstance = (specificAppId = null) => {
             : requestedAppId;
     const cleanedAppId = appId?.toString()?.replace?.(/[^a-zA-Z0-9]/g, '') ?? appId?.toString();
 
-    // Store the app_id used for this connection
+    // Store the app_id for legacy compatibility tracking
     if (currentConnectionAppId === null || specificAppId !== null) {
         currentConnectionAppId = appId;
     }
 
-    if (specificAppId === null) {
-        if (currentConnectionAppId === appId) {
-            console.log(`🔗 [WEBSOCKET] Creating new connection with App ID ${appId}`);
-        }
-    } else {
-        console.log(`🔗 [WEBSOCKET] Creating connection with specific App ID ${appId}`);
-    }
+    // Choose WebSocket URL based on auth type:
+    // - OIDC JWT: use modern api.derivws.com public endpoint (no app_id in URL)
+    // - Legacy token: use traditional ws.derivws.com with numeric app_id
+    const oidcSession = isOidcSession();
+    let socket_url;
 
-    const socket_url = `wss://${cleanedServer}/websockets/v3?app_id=${cleanedAppId}&l=${getInitialLanguage()}&brand=${website_name.toLowerCase()}`;
+    if (oidcSession) {
+        socket_url = DERIVWS_PUBLIC_WS;
+        console.log(`🔗 [WEBSOCKET] OIDC session detected — connecting to modern Deriv Trading API`);
+    } else {
+        socket_url = `wss://${cleanedServer}/websockets/v3?app_id=${cleanedAppId}&l=${getInitialLanguage()}&brand=${website_name.toLowerCase()}`;
+        if (specificAppId === null) {
+            console.log(`🔗 [WEBSOCKET] Legacy session — connecting with App ID ${appId}`);
+        } else {
+            console.log(`🔗 [WEBSOCKET] Legacy session — connecting with specific App ID ${appId}`);
+        }
+    }
 
     const delegating_socket = new DelegatingWebSocket(socket_url);
     const deriv_api = new DerivAPIBasic({
