@@ -7,62 +7,7 @@ interface AppLoaderProps {
     duration?: number;
 }
 
-// ── Generate realistic candlestick data ─────────────────────────
-function generateCandleData(count: number) {
-    const candles: Array<{
-        open: number;
-        close: number;
-        high: number;
-        low: number;
-        volume: number;
-        bull: boolean;
-    }> = [];
-
-    let price = 50 + Math.random() * 30;
-
-    for (let i = 0; i < count; i++) {
-        const volatility = 1.5 + Math.random() * 4;
-        const direction = Math.random() > 0.45 ? 1 : -1;
-        const move = direction * volatility;
-
-        const open = price;
-        const close = price + move;
-        const high = Math.max(open, close) + Math.random() * 2;
-        const low = Math.min(open, close) - Math.random() * 2;
-        const volume = 10 + Math.random() * 40;
-        const bull = close >= open;
-
-        candles.push({ open, close, high, low, volume, bull });
-        price = close;
-    }
-
-    return candles;
-}
-
-// ── Generate EMA path from candles ──────────────────────────────
-function generateEmaPath(candles: ReturnType<typeof generateCandleData>, chartHeight: number, chartWidth: number) {
-    const prices = candles.map(c => (c.open + c.close) / 2);
-    const allPrices = candles.flatMap(c => [c.high, c.low]);
-    const minP = Math.min(...allPrices);
-    const maxP = Math.max(...allPrices);
-    const range = maxP - minP || 1;
-
-    // Simple EMA
-    const period = 8;
-    const k = 2 / (period + 1);
-    const ema: number[] = [prices[0]];
-    for (let i = 1; i < prices.length; i++) {
-        ema.push(prices[i] * k + ema[i - 1] * (1 - k));
-    }
-
-    const points = ema.map((val, i) => {
-        const x = (i / (candles.length - 1)) * chartWidth;
-        const y = chartHeight - ((val - minP) / range) * chartHeight;
-        return `${x},${y}`;
-    });
-
-    return `M${points.join(' L')}`;
-}
+// Removed CSS candle generation in favor of a static blurred TradingView image.
 
 const AppLoader: React.FC<AppLoaderProps> = ({ onLoadingComplete }) => {
     const [isVisible, setIsVisible] = useState(true);
@@ -92,17 +37,7 @@ const AppLoader: React.FC<AppLoaderProps> = ({ onLoadingComplete }) => {
         []
     );
 
-    // Pre-generate chart data once
-    const candleData = useMemo(() => generateCandleData(80), []);
-    const emaPath = useMemo(() => generateEmaPath(candleData, 400, 1200), [candleData]);
-
-    // Price range for scaling
-    const priceRange = useMemo(() => {
-        const allPrices = candleData.flatMap(c => [c.high, c.low]);
-        return { min: Math.min(...allPrices), max: Math.max(...allPrices) };
-    }, [candleData]);
-
-    const priceSpread = priceRange.max - priceRange.min || 1;
+    // Price range simulation removed.
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -151,18 +86,7 @@ const AppLoader: React.FC<AppLoaderProps> = ({ onLoadingComplete }) => {
     const statusText =
         progress < 30 ? 'INITIALIZING' : progress < 70 ? 'CONNECTING' : progress < 95 ? 'LOADING' : 'READY';
 
-    // Price axis labels
-    const priceLabels = useMemo(() => {
-        const labels: string[] = [];
-        for (let i = 0; i < 6; i++) {
-            const val = priceRange.max - (i / 5) * priceSpread;
-            labels.push(val.toFixed(2));
-        }
-        return labels;
-    }, [priceRange, priceSpread]);
-
-    // Time labels
-    const timeLabels = ['09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
+    // Axis labels removed as we use image now.
 
     if (!isVisible) return null;
 
@@ -170,95 +94,9 @@ const AppLoader: React.FC<AppLoaderProps> = ({ onLoadingComplete }) => {
         <div className='georgetown-loader'>
             {/* ── TradingView Chart Background ── */}
             <div className='tv-chart-bg'>
-                <div className='tv-chart-bg__grid' />
-                <div className='tv-chart-bg__grid-minor' />
-
-                {/* Candlesticks */}
-                <div className='tv-chart-bg__candles'>
-                    {candleData.map((candle, i) => {
-                        const bodyHeight = Math.max(3, (Math.abs(candle.close - candle.open) / priceSpread) * 250);
-                        const wickHeight = ((candle.high - candle.low) / priceSpread) * 250;
-                        const bodyBottom = ((Math.min(candle.open, candle.close) - priceRange.min) / priceSpread) * 250;
-                        const wickBottom = ((candle.low - priceRange.min) / priceSpread) * 250;
-
-                        return (
-                            <div
-                                key={i}
-                                className={`tv-candle tv-candle--${candle.bull ? 'bull' : 'bear'}`}
-                                style={{ height: `${wickHeight + 20}px` }}
-                            >
-                                <div
-                                    className='tv-candle__wick'
-                                    style={{
-                                        height: `${wickHeight}px`,
-                                        bottom: `${wickBottom - ((Math.min(...candleData.map(c => c.low)) - priceRange.min) / priceSpread) * 250}px`,
-                                    }}
-                                />
-                                <div
-                                    className='tv-candle__body'
-                                    style={{
-                                        height: `${bodyHeight}px`,
-                                        marginTop: 'auto',
-                                        marginBottom: `${bodyBottom - ((Math.min(...candleData.map(c => c.low)) - priceRange.min) / priceSpread) * 250}px`,
-                                    }}
-                                />
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Volume Bars */}
-                <div className='tv-chart-bg__volume'>
-                    {candleData.map((candle, i) => (
-                        <div
-                            key={i}
-                            className={`tv-volume-bar tv-volume-bar--${candle.bull ? 'bull' : 'bear'}`}
-                            style={{ height: `${candle.volume}%` }}
-                        />
-                    ))}
-                </div>
-
-                {/* EMA Line */}
-                <div className='tv-chart-bg__ema'>
-                    <svg viewBox='0 0 1200 400' preserveAspectRatio='none'>
-                        <defs>
-                            <linearGradient id='emaGrad' x1='0%' y1='0%' x2='100%' y2='0%'>
-                                <stop offset='0%' stopColor='#f59e0b' stopOpacity='0.6' />
-                                <stop offset='50%' stopColor='#f59e0b' stopOpacity='0.8' />
-                                <stop offset='100%' stopColor='#f59e0b' stopOpacity='0.6' />
-                            </linearGradient>
-                        </defs>
-                        <path d={emaPath} fill='none' stroke='url(#emaGrad)' strokeWidth='2' strokeLinecap='round' />
-                    </svg>
-                </div>
-
-                {/* Price Axis */}
-                <div className='tv-chart-bg__price-axis'>
-                    {priceLabels.map((label, i) => (
-                        <span key={i} className='tv-price-label'>
-                            {label}
-                        </span>
-                    ))}
-                </div>
-
-                {/* Time Axis */}
-                <div className='tv-chart-bg__time-axis'>
-                    {timeLabels.map((label, i) => (
-                        <span key={i} className='tv-time-label'>
-                            {label}
-                        </span>
-                    ))}
-                </div>
-
-                {/* Crosshair */}
-                <div className='tv-chart-bg__crosshair' />
-                <div className='tv-chart-bg__current-price'>{((priceRange.min + priceRange.max) / 2).toFixed(2)}</div>
-
-                {/* Scanning effect */}
-                <div className='tv-chart-bg__scanline' />
-
-                {/* Blur overlay on top */}
+                <img src="/assets/tv_chart_bg.png" alt="Trading View Background" className="tv-chart-bg__image" />
                 <div className='tv-chart-bg__blur-overlay' />
+                <div className='tv-chart-bg__scanline' />
             </div>
 
             {/* ── Ambient Glow Orbs ── */}

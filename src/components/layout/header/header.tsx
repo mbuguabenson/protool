@@ -11,6 +11,7 @@ import { navigateToTransfer } from '@/utils/transfer-utils';
 import { Localize } from '@deriv-com/translations';
 import { Header, useDevice, Wrapper } from '@deriv-com/ui';
 import { AppLogo } from '../app-logo';
+import { useGlobalToggle } from '@/hooks/useGlobalToggle';
 import AccountSwitcher from './account-switcher';
 import MenuItems from './menu-items';
 import MobileMenu from './mobile-menu';
@@ -22,6 +23,10 @@ const AppHeader = observer(() => {
     const { client } = useStore() ?? {};
     const [authTimeout, setAuthTimeout] = useState(false);
     const is_account_regenerating = client?.is_account_regenerating || false;
+
+    // Global toggles
+    const [speedMode, setSpeedMode] = useGlobalToggle({ key: 'autoai_speed_mode', defaultValue: false });
+    const [isKes, setIsKes] = useGlobalToggle({ key: 'currency_mode_kes', defaultValue: false });
 
     // Detect OAuth callback on mount (before App.tsx cleans up the URL).
     // When ?code=...&state=... is present the full auth flow can take 7-15 s
@@ -138,8 +143,24 @@ const AppHeader = observer(() => {
                     // For mobile left section - only account switcher
                     return (
                         <div className='auth-actions'>
+                            <div className='header-toggles'>
+                                <button
+                                    className={clsx('header-toggle-btn', { 'header-toggle-btn--active': speedMode })}
+                                    onClick={() => setSpeedMode(!speedMode)}
+                                    title="Speed Mode: Trade on every tick"
+                                >
+                                    SPEED: {speedMode ? 'ON' : 'OFF'}
+                                </button>
+                                <button
+                                    className={clsx('header-toggle-btn', { 'header-toggle-btn--active': isKes })}
+                                    onClick={() => setIsKes(!isKes)}
+                                    title="Toggle Currency (USD / KES)"
+                                >
+                                    {isKes ? 'KES' : 'USD'}
+                                </button>
+                            </div>
                             <div className='account-info'>
-                                <AccountSwitcher activeAccount={activeAccount} />
+                                <AccountSwitcher activeAccount={activeAccount} isKes={isKes} />
                             </div>
                         </div>
                     );
@@ -147,9 +168,25 @@ const AppHeader = observer(() => {
                     // For right section - transfer button (and account switcher on desktop)
                     return (
                         <div className='auth-actions'>
+                            <div className='header-toggles'>
+                                <button
+                                    className={clsx('header-toggle-btn', { 'header-toggle-btn--active': speedMode })}
+                                    onClick={() => setSpeedMode(!speedMode)}
+                                    title="Speed Mode: Trade on every tick"
+                                >
+                                    SPEED: {speedMode ? 'ON' : 'OFF'}
+                                </button>
+                                <button
+                                    className={clsx('header-toggle-btn', { 'header-toggle-btn--active': isKes })}
+                                    onClick={() => setIsKes(!isKes)}
+                                    title="Toggle Currency (USD / KES)"
+                                >
+                                    {isKes ? 'KES' : 'USD'}
+                                </button>
+                            </div>
                             {isDesktop && (
                                 <div className='account-info'>
-                                    <AccountSwitcher activeAccount={activeAccount} />
+                                    <AccountSwitcher activeAccount={activeAccount} isKes={isKes} />
                                 </div>
                             )}
                             <Button

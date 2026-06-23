@@ -286,3 +286,37 @@
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
 }
+
+.header-toggles {
+    display: flex;
+    gap: 8px;
+    margin-right: 16px;
+    align-items: center;
+
+    .header-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--general-section-2);
+        color: var(--text-general);
+        border-radius: 8px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            background: var(--general-section-2);
+        }
+
+        &--active {
+            background: var(--brand-red-coral);
+            border-color: var(--brand-red-coral);
+            color: #fff;
+
+            &:hover {
+                background: var(--brand-red-coral);
+                opacity: 0.9;
+            }
+        }
+    }
+}

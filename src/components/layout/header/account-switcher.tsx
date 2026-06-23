@@ -12,7 +12,9 @@ import { TAccountSwitcher } from './common/types';
 import AccountInfoWrapper from './account-info-wrapper';
 import './account-switcher.scss';
 
-const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
+type ExtendedAccountSwitcher = TAccountSwitcher & { isKes?: boolean };
+
+const AccountSwitcher = observer(({ activeAccount, isKes }: ExtendedAccountSwitcher) => {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { accountList, activeLoginid } = useApiBase();
@@ -55,15 +57,21 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
     const formattedAccounts = useMemo(() => {
         if (!accountList) return [];
         return accountList
-            .map(account => ({
-                loginid: account.loginid,
-                currency: account.currency,
-                balance: addComma(Number(account.balance ?? 0).toFixed(getDecimalPlaces(account.currency))),
-                isVirtual: isDemoAccount(account.loginid),
-                isActive: account.loginid === activeLoginid,
-            }))
+            .map(account => {
+                const rawBalance = Number((account.balance ?? 0).toString().replace(/,/g, ''));
+                const displayBalance = isKes ? rawBalance * 130 : rawBalance;
+                const displayCurrency = isKes ? 'KES' : account.currency;
+                
+                return {
+                    loginid: account.loginid,
+                    currency: displayCurrency,
+                    balance: addComma(displayBalance.toFixed(isKes ? 2 : getDecimalPlaces(account.currency))),
+                    isVirtual: isDemoAccount(account.loginid),
+                    isActive: account.loginid === activeLoginid,
+                };
+            })
             .sort((a, b) => (a.isActive ? -1 : b.isActive ? 1 : 0));
-    }, [accountList, activeLoginid]);
+    }, [accountList, activeLoginid, isKes]);
 
     if (!activeAccount) return null;
 
@@ -122,18 +130,26 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                         </div>
                         {(typeof balance !== 'undefined' || !currency) && (
                             <div className='acc-info__balance-section'>
-                                <p
-                                    data-testid='dt_balance'
-                                    className={classNames('acc-info__balance', {
-                                        'acc-info__balance--no-currency': !currency && !isVirtual,
-                                    })}
-                                >
-                                    {!currency ? (
-                                        <Localize i18n_default_text='No currency assigned' />
-                                    ) : (
-                                        `${balance} ${getCurrencyDisplayCode(currency)}`
-                                    )}
-                                </p>
+                                {(() => {
+                                    const rawBalance = Number((balance ?? '0').toString().replace(/,/g, ''));
+                                    const displayBalance = isKes ? rawBalance * 130 : rawBalance;
+                                    const displayCurrency = isKes ? 'KES' : currency;
+                                    
+                                    return (
+                                        <p
+                                            data-testid='dt_balance'
+                                            className={classNames('acc-info__balance', {
+                                                'acc-info__balance--no-currency': !currency && !isVirtual,
+                                            })}
+                                        >
+                                            {!currency ? (
+                                                <Localize i18n_default_text='No currency assigned' />
+                                            ) : (
+                                                `${addComma(displayBalance.toFixed(isKes ? 2 : getDecimalPlaces(currency)))} ${getCurrencyDisplayCode(displayCurrency)}`
+                                            )}
+                                        </p>
+                                    );
+                                })()}
                             </div>
                         )}
                     </div>

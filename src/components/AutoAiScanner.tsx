@@ -4,9 +4,10 @@ import { derivWebSocket } from '../lib/deriv-api-v1/deriv-websocket-manager';
 import { analyzeMultiWindow, type MultiWindowAnalysis } from '../lib/autoai/analysis';
 import { generateCombinedRankedSignals, type Signal } from '../lib/autoai/signals';
 import { SYMBOLS } from '../lib/autoai/symbols';
+import { useGlobalToggle } from '../hooks/useGlobalToggle';
 import './AutoAiScanner.scss';
 
-type Step = 'orb' | 'config' | 'scanning' | 'result';
+type Step = 'orb' | 'config' | 'scanning' | 'result' | 'executing';
 
 type SubscriptionState = {
   symbol: string;
@@ -134,6 +135,7 @@ type AutoAiBotXmlOptions = {
   takeProfit: string;
   stopLoss: string;
   martingale: string;
+  speedMode: boolean;
 };
 
 function getTradeTypeDefaults(selectedTradeType: string) {
@@ -204,6 +206,7 @@ function buildEntryLogicSignal(
   selectedTradeType: string,
   contractType: string,
   predictionValue: string,
+  speedMode: boolean
 ) {
   let purchaseType = contractType;
   let compareOp = 'GTE';
@@ -254,6 +257,17 @@ function buildEntryLogicSignal(
         </block>
       </statement>`;
 
+  if (speedMode) {
+    return `
+  <block type="before_purchase" id="bp1" deletable="false" x="0" y="560">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="purchase" id="bp_pur1">
+        <field name="PURCHASE_LIST">${purchaseType}</field>
+      </block>
+    </statement>
+  </block>`;
+  }
+
   return `
   <block type="before_purchase" id="bp1" deletable="false" x="0" y="560">
     <statement name="BEFOREPURCHASE_STACK">
@@ -284,6 +298,7 @@ function generateAutoAiBotXml({
   takeProfit,
   stopLoss,
   martingale,
+  speedMode,
 }: AutoAiBotXmlOptions) {
   const { tradeTypeCat, tradeType, contractType, prediction, hasPrediction } = resolveSignalContract(
     selectedSignal,
@@ -298,7 +313,95 @@ function generateAutoAiBotXml({
           </shadow>
         </value>`
     : '';
-  const beforePurchaseXml = buildEntryLogicSignal(selectedSignal, selectedTradeType, contractType, predictionValue);
+  const beforePurchaseXml = buildEntryLogicSignal(selectedSignal, selectedTradeType, contractType, predictionValue, speedMode);
+
+  const afterPurchaseXml = `
+  <block type="after_purchase" id="ap1" x="0" y="700">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="controls_if" id="ap_if1">
+        <mutation else="1"></mutation>
+        <value name="IF0">
+          <block type="contract_check_result" id="ccr1">
+            <field name="CHECK_RESULT">win</field>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set" id="vs_ap1">
+            <field name="VAR" id="v_stake">Stake</field>
+            <value name="VALUE">
+              <block type="variables_get" id="vg_ap1">
+                <field name="VAR" id="v_init_stake">Initial Stake</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <statement name="ELSE">
+          <block type="variables_set" id="vs_ap2">
+            <field name="VAR" id="v_stake">Stake</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="ma_ap1">
+                <field name="OP">MULTIPLY</field>
+                <value name="A">
+                  <block type="variables_get" id="vg_ap2">
+                    <field name="VAR" id="v_stake">Stake</field>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="vg_ap3">
+                    <field name="VAR" id="v_mg">Martingale</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <next>
+          <block type="controls_if" id="ap_if2">
+            <mutation else="1"></mutation>
+            <value name="IF0">
+              <block type="logic_compare" id="lc_ap1">
+                <field name="OP">LT</field>
+                <value name="A">
+                  <block type="total_profit" id="tp_ap1"></block>
+                </value>
+                <value name="B">
+                  <block type="variables_get" id="vg_ap4">
+                    <field name="VAR" id="v_tp">Take Profit</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="controls_if" id="ap_if3">
+                <mutation else="1"></mutation>
+                <value name="IF0">
+                  <block type="logic_compare" id="lc_ap2">
+                    <field name="OP">GT</field>
+                    <value name="A">
+                      <block type="total_profit" id="tp_ap2"></block>
+                    </value>
+                    <value name="B">
+                      <block type="math_single" id="ms_ap1">
+                        <field name="OP">NEG</field>
+                        <value name="NUM">
+                          <block type="variables_get" id="vg_ap5">
+                            <field name="VAR" id="v_sl">Stop Loss</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="trade_again" id="ta_ap1"></block>
+                </statement>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>`;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <xml xmlns="https://developers.google.com/blockly/xml" is_dbot="true" collection="false">
@@ -412,6 +515,7 @@ function generateAutoAiBotXml({
     </statement>
   </block>
   ${beforePurchaseXml}
+  ${afterPurchaseXml}
 </xml>`;
 }
 
@@ -430,6 +534,7 @@ export default function AutoAiScanner({
   const [takeProfit, setTakeProfit] = useState('10');
   const [stopLoss, setStopLoss] = useState('5');
   const [martingale, setMartingale] = useState('2');
+  const [speedMode, setSpeedMode] = useGlobalToggle({ key: 'autoai_speed_mode', defaultValue: false });
   const [multiMarket, setMultiMarket] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanTarget, setScanTarget] = useState(1);
@@ -583,6 +688,25 @@ export default function AutoAiScanner({
     }, 400);
   }, [multiMarket, selectedSymbol, subscribeSymbol]);
 
+  useEffect(() => {
+    if (step === 'result' && combinedSignals.length > 0 && !selectedSignal) {
+      setSelectedSignal(combinedSignals[0]);
+      setStep('executing');
+    }
+  }, [step, combinedSignals, selectedSignal]);
+
+  useEffect(() => {
+    if (step === 'executing') {
+      const timer = setTimeout(() => {
+        handleLoadAndRunInternal();
+        setStep('orb');
+        setOrbVisible(true);
+        setMinimized(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [step]); // handleLoadAndRunInternal omitted from dep array to avoid repeated triggers if it changes
+
   const resetScan = useCallback(() => {
     if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
     if (subscriptionIdRef.current) {
@@ -605,9 +729,10 @@ export default function AutoAiScanner({
       takeProfit,
       stopLoss,
       martingale,
+      speedMode,
     });
     if (onLoadBot) onLoadBot(xml);
-  }, [selectedTradeType, stake, takeProfit, stopLoss, martingale, selectedSymbol, selectedSignal, combinedSignals, onLoadBot]);
+  }, [selectedTradeType, stake, takeProfit, stopLoss, martingale, speedMode, selectedSymbol, selectedSignal, combinedSignals, onLoadBot]);
 
   const handleLoadAndRunInternal = useCallback(() => {
     const signalToUse = selectedSignal || combinedSignals[0] || null;
@@ -619,9 +744,10 @@ export default function AutoAiScanner({
       takeProfit,
       stopLoss,
       martingale,
+      speedMode,
     });
     if (onLoadAndRun) onLoadAndRun(xml);
-  }, [selectedTradeType, stake, takeProfit, stopLoss, martingale, selectedSymbol, selectedSignal, combinedSignals, onLoadAndRun]);
+  }, [selectedTradeType, stake, takeProfit, stopLoss, martingale, speedMode, selectedSymbol, selectedSignal, combinedSignals, onLoadAndRun]);
 
   const selectedSymbolInfo = SYMBOLS.find((s) => s.id === selectedSymbol);
   const lastDigit = mwa?.lastDigit ?? null;
@@ -808,6 +934,22 @@ export default function AutoAiScanner({
                 </button>
               </div>
 
+              <div className="auto-ai-scanner__note-card">
+                <div>
+                  <div className="auto-ai-scanner__note-title">Speed Mode</div>
+                  <div className="auto-ai-scanner__note-text">Trade every tick generated on the bot builder</div>
+                </div>
+                <button
+                  type="button"
+                  className={classNames('auto-ai-scanner__toggle', {
+                    'auto-ai-scanner__toggle--active': speedMode,
+                  })}
+                  onClick={() => setSpeedMode((v) => !v)}
+                >
+                  <div className="auto-ai-scanner__toggle-knob" />
+                </button>
+              </div>
+
               <div className="auto-ai-scanner__action-row">
                 <button type="button" className="auto-ai-scanner__button--secondary" onClick={resetScan}>
                   Cancel
@@ -943,6 +1085,20 @@ export default function AutoAiScanner({
                 <button type="button" className="auto-ai-scanner__button--primary" onClick={handleLoadAndRunInternal}>
                   ▶ Load & Run
                 </button>
+              </div>
+            </div>
+          )}
+
+          {step === 'executing' && (
+            <div className="auto-ai-scanner__executing-state">
+              <div className="auto-ai-scanner__moving-circles">
+                <div className="circle"></div>
+                <div className="circle"></div>
+                <div className="circle"></div>
+              </div>
+              <div className="auto-ai-scanner__executing-text">Waiting for entry signal...</div>
+              <div className="auto-ai-scanner__executing-subtext">
+                {selectedSignal?.label} • {selectedSignal?.tradeDirection}
               </div>
             </div>
           )}
