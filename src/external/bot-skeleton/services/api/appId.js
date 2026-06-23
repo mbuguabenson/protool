@@ -122,7 +122,19 @@ const DERIVWS_PUBLIC_WS = 'wss://api.derivws.com/trading/v1/options/ws/public';
  */
 const isOidcSession = () => {
     const storedToken = localStorage.getItem('authToken') || '';
-    return storedToken.startsWith('eyJ');
+    if (storedToken.startsWith('eyJ')) return true;
+
+    // Fallback: detect OIDC indicators during auth initialization/callback redirect
+    if (typeof window !== 'undefined') {
+        const hasCodeVerifier = !!sessionStorage.getItem('oauth_code_verifier');
+        const isCallbackPath = window.location.pathname === '/callback';
+        const hasOidcQueryParams = window.location.search.includes('code=ory_') || window.location.search.includes('scope=trade');
+        
+        if (hasCodeVerifier || isCallbackPath || hasOidcQueryParams) {
+            return true;
+        }
+    }
+    return false;
 };
 
 /**

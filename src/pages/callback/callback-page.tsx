@@ -98,7 +98,10 @@ const CallbackPage = () => {
                 let selectedAccountType = undefined;
 
                 let is_token_set = false;
-                const api = await generateDerivApiInstance();
+                if (tokens.token1) {
+                    localStorage.setItem('authToken', tokens.token1);
+                }
+                const api = await generateDerivApiInstance() as any;
                 if (api) {
                     const { authorize, error } = await api.authorize(tokens.token1);
                     api.disconnect();

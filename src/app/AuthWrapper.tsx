@@ -10,6 +10,7 @@ import { DerivWSAccountsService } from '@/services/derivws-accounts.service';
 import { localize } from '@deriv-com/translations';
 import { URLUtils } from '@deriv-com/utils';
 import App from './App';
+import brandConfig from '@/components/shared/brand.config.json';
 import type { LoginInfo } from '@/app/types';
 import {
     setAccountList,
@@ -47,7 +48,7 @@ const restoreLoginFromServerSession = async () => {
         }
 
         const sessionToken = sessionData.access_token;
-        const CLIENT_ID = process.env.CLIENT_ID || '33cJNudwxWHenralOsZow';
+        const CLIENT_ID = process.env.CLIENT_ID || brandConfig.oauth?.client_id || '33yStbGyLdNdqAyCuDk1d';
         // Ensure CLIENT_ID is set for subsequent API calls
         if (!process.env.CLIENT_ID) {
             process.env.CLIENT_ID = CLIENT_ID;
