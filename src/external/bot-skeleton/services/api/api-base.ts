@@ -92,6 +92,15 @@ class APIBase {
     async init(force_create_connection = false) {
         this.toggleRunButton(true);
 
+        // If already authorized and connection is healthy, skip re-init.
+        // This prevents the double-init race condition when AppRoot calls api_base.init()
+        // AFTER AuthWrapper has already set up a valid OIDC connection.
+        if (!force_create_connection && this.is_authorized && this.api?.connection.readyState === 1) {
+            console.log('[api_base] Already authorized and connected — skipping redundant init()');
+            chart_api.init(false);
+            return;
+        }
+
         if (this.api) {
             this.unsubscribeAllSubscriptions();
         }

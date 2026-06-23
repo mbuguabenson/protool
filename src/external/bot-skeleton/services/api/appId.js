@@ -121,8 +121,39 @@ const DERIVWS_PUBLIC_WS = 'wss://api.derivws.com/trading/v1/options/ws/public';
  * OIDC JWTs always start with 'eyJ'. Legacy tokens are short alphanumeric strings.
  */
 const isOidcSession = () => {
+    // FASTEST CHECK: logged_state cookie — set by Deriv OAuth server upon successful login.
+    // This cookie is present before tokens are stored in localStorage, so check it FIRST.
+    // If logged_state=true, we KNOW this is an OIDC session — skip legacy WS.
+    if (typeof document !== 'undefined') {
+        const cookies = document.cookie.split(';').map(c => c.trim());
+        const loggedStateCookie = cookies.find(c => c.startsWith('logged_state='));
+        if (loggedStateCookie && loggedStateCookie.split('=')[1] === 'true') {
+            return true;
+        }
+        // Also check for Hydra session cookie patterns
+        const hasHydraSession = cookies.some(c => c.startsWith('ory_') || c.startsWith('oauth_'));
+        if (hasHydraSession) return true;
+    }
+
+    // Check main active token helper
+    const activeToken = V2GetActiveToken() || '';
+    if (activeToken.startsWith('eyJ')) return true;
+
+    // Check localStorage keys
     const storedToken = localStorage.getItem('authToken') || '';
     if (storedToken.startsWith('eyJ')) return true;
+
+    const legacyToken = localStorage.getItem('deriv_api_token') || '';
+    if (legacyToken.startsWith('eyJ')) return true;
+
+    // Check sessionStorage auth_info
+    try {
+        const authInfoStr = sessionStorage.getItem('auth_info');
+        if (authInfoStr) {
+            const authInfo = JSON.parse(authInfoStr);
+            if (authInfo?.access_token?.startsWith('eyJ')) return true;
+        }
+    } catch (e) {}
 
     // Fallback: detect OIDC indicators during auth initialization/callback redirect
     if (typeof window !== 'undefined') {

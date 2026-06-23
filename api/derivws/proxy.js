@@ -1,11 +1,53 @@
 import { URL } from 'url';
 
 export default async function handler(req, res) {
+    // CORS headers - allow same-origin and cross-origin requests
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, Deriv-App-ID, deriv-app-id');
+
+    // Handle preflight OPTIONS requests
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     try {
+        // Vercel may rewrite req.url to the function destination.
+        // Try multiple sources to find the original request path.
+        // Priority: x-original-url header > x-vercel-forwarded-for path > req.url
+        let originalPath = '';
+
+        // Check for original URL in headers (Vercel/nginx proxy headers)
+        const xOriginalUrl = req.headers['x-original-url'] || req.headers['x-rewrite-url'];
+        if (xOriginalUrl) {
+            try {
+                const parsedOriginal = new URL(xOriginalUrl, `http://${req.headers.host || 'localhost'}`);
+                originalPath = parsedOriginal.pathname;
+            } catch (_) {}
+        }
+
+        // Fall back to req.url
+        if (!originalPath) {
+            try {
+                const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+                originalPath = urlObj.pathname;
+            } catch (_) {
+                originalPath = req.url || '/';
+            }
+        }
+
         // Extract the subpath after /api/derivws/
         // E.g. /api/derivws/trading/v1/options/accounts -> trading/v1/options/accounts
-        const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-        const subpath = urlObj.pathname.replace(/^\/api\/derivws\//, '').replace(/^\//, '');
+        const subpath = originalPath.replace(/^\/api\/derivws\//, '').replace(/^\//, '');
+
+        // Sanity check: if subpath is empty or looks like the proxy file itself, reject
+        if (!subpath || subpath === 'proxy.js' || subpath === 'proxy') {
+            console.error('[DerivWS Proxy] Could not extract valid subpath from URL:', req.url, '| originalPath:', originalPath);
+            return res.status(400).json({
+                error: 'invalid_proxy_path',
+                error_description: `Could not determine target API path. Raw URL: ${req.url}`,
+            });
+        }
         
         const targetUrl = `https://api.derivws.com/${subpath}`;
         
