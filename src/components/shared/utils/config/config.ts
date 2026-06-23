@@ -2,14 +2,14 @@ import { isStaging } from '../url/helpers';
 import brandConfig from '../../brand.config.json';
 
 export const APP_IDS = {
-    LOCALHOST: 113555,
-    TMP_STAGING: 113555,
-    STAGING: 113555,
-    STAGING_BE: 113555,
-    STAGING_ME: 113555,
-    PRODUCTION: 113555,
-    PRODUCTION_BE: 113555,
-    PRODUCTION_ME: 113555,
+    LOCALHOST: '33yStbGyLdNdqAyCuDk1d',
+    TMP_STAGING: '33yStbGyLdNdqAyCuDk1d',
+    STAGING: '33yStbGyLdNdqAyCuDk1d',
+    STAGING_BE: '33yStbGyLdNdqAyCuDk1d',
+    STAGING_ME: '33yStbGyLdNdqAyCuDk1d',
+    PRODUCTION: '33yStbGyLdNdqAyCuDk1d',
+    PRODUCTION_BE: '33yStbGyLdNdqAyCuDk1d',
+    PRODUCTION_ME: '33yStbGyLdNdqAyCuDk1d',
 };
 
 export const livechat_license_id = 12049137;
@@ -55,7 +55,7 @@ export const getConfiguredAppId = () => {
         return parsed_app_id;
     }
 
-    return null;
+    return configured_app_id;
 };
 
 export const getConfiguredClientId = () =>
@@ -288,14 +288,14 @@ export const getDefaultAppIdAndUrl = () => {
     return { app_id, server_url };
 };
 
-// Default app ID - always 113555
-const DEFAULT_APP_ID = 113555;
+// Default app ID - always '33yStbGyLdNdqAyCuDk1d'
+const DEFAULT_APP_ID = '33yStbGyLdNdqAyCuDk1d';
 
 /**
  * No-op function for backward compatibility - app ID no longer switches
  */
 export const switchAppIdAfterTrade = () => {
-    // App ID switching is disabled - always use 113555
+    // App ID switching is disabled - always use '33yStbGyLdNdqAyCuDk1d'
     return null;
 };
 
@@ -331,7 +331,7 @@ export const getAppId = () => {
         if (current_domain && domain_app_ids[current_domain as keyof typeof domain_app_ids]) {
             app_id = domain_app_ids[current_domain as keyof typeof domain_app_ids];
         } else {
-            // For production domains, always use default app ID 113555
+            // For production domains, always use default app ID '33yStbGyLdNdqAyCuDk1d'
             app_id = DEFAULT_APP_ID;
         }
     }

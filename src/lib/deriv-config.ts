@@ -26,7 +26,7 @@ const getDerivAppId = () => {
          process.env.REACT_APP_DERIV_APP_ID || 
          process.env.DERIV_APP_ID || 
          brandConfig.oauth.app_id || 
-         '113555'; // Use 113555 as default
+         '33yStbGyLdNdqAyCuDk1d'; // Use '33yStbGyLdNdqAyCuDk1d' as default
 };
 
 const getDerivLegacyAppId = () => {

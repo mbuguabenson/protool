@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         // Alphanumeric client ID required for REST calls to https://api.derivws.com
         const oauth_client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
         // Numeric legacy app ID required for frontend/bot-skeleton websocket connection parameter
-        const legacy_app_id = app_id || process.env.DERIV_LEGACY_APP_ID || '113555';
+        const legacy_app_id = app_id || process.env.DERIV_LEGACY_APP_ID || '33yStbGyLdNdqAyCuDk1d';
 
         console.log('[Session] Restoring session. Token present:', !!access_token, 'Legacy App ID:', legacy_app_id, 'OAuth Client ID:', oauth_client_id);
 
