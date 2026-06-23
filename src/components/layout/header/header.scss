@@ -287,35 +287,105 @@
     to   { transform: rotate(360deg); }
 }
 
+/* ─── Hamburger button ──────────────────────────────────────── */
+.header-hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin-inline-end: 4px;
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: var(--text-prominent);
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.25);
+        transform: scale(1.05);
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+
+    .hamburger-icon {
+        display: block;
+        flex-shrink: 0;
+    }
+}
+
+/* ─── Header toggle pills ───────────────────────────────────── */
 .header-toggles {
     display: flex;
-    gap: 8px;
-    margin-right: 16px;
+    gap: 6px;
+    margin-right: 12px;
     align-items: center;
 
     .header-toggle-btn {
-        background: transparent;
-        border: 1px solid var(--general-section-2);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1.5px solid rgba(255, 255, 255, 0.1);
         color: var(--text-general);
-        border-radius: 8px;
-        padding: 4px 10px;
-        font-size: 11px;
+        border-radius: 20px;
+        padding: 4px 11px 4px 9px;
+        font-size: 10.5px;
         font-weight: 700;
+        letter-spacing: 0.03em;
         cursor: pointer;
-        transition: all 0.2s;
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.15s ease;
+        white-space: nowrap;
 
-        &:hover {
-            background: var(--general-section-2);
+        &__state {
+            opacity: 0.6;
+            font-size: 9.5px;
+            font-weight: 600;
         }
 
-        &--active {
-            background: var(--brand-red-coral);
-            border-color: var(--brand-red-coral);
+        &:hover:not(&--active) {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.22);
+        }
+
+        &:active {
+            transform: scale(0.96);
+        }
+
+        /* Speed button active — amber/gold glow */
+        &--speed#{&}--active {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-color: #f59e0b;
             color: #fff;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.5);
+
+            .header-toggle-btn__state { opacity: 0.8; }
 
             &:hover {
-                background: var(--brand-red-coral);
-                opacity: 0.9;
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.65);
+            }
+        }
+
+        /* Currency button active — coral/red glow */
+        &--currency#{&}--active {
+            background: linear-gradient(135deg, #ff6444 0%, #e84040 100%);
+            border-color: #ff6444;
+            color: #fff;
+            box-shadow: 0 0 14px rgba(255, 100, 68, 0.5);
+
+            &:hover {
+                box-shadow: 0 0 20px rgba(255, 100, 68, 0.65);
             }
         }
     }

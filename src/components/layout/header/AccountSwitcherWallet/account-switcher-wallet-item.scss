@@ -5,18 +5,56 @@
     &__container {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 1.35rem 1.6rem;
-        border-radius: $BORDER_RADIUS;
-        gap: 1.6rem;
+        padding: 10px 14px;
+        border-radius: 12px;
+        gap: 12px;
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        border: 1.5px solid transparent;
+        background: var(--general-main-1);
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.15s ease;
+
+        /* Subtle inner gloss line at the top */
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.06) 0%,
+                transparent 50%
+            );
+            pointer-events: none;
+        }
 
         &--active {
-            background-color: var(--general-active);
+            background: rgba(255, 100, 68, 0.08);
+            border-color: rgba(255, 100, 68, 0.35);
+            box-shadow:
+                0 0 0 1px rgba(255, 100, 68, 0.15) inset,
+                0 4px 16px rgba(255, 100, 68, 0.12);
+
+            .acc-switcher-wallet-item__badge {
+                background: linear-gradient(135deg, #ff6444 0%, #e84040 100%);
+                color: #fff;
+            }
         }
 
         &:hover:not(&--active) {
-            background-color: var(--general-hover);
+            background: var(--general-hover);
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        &:active {
+            transform: translateY(0);
         }
     }
 
@@ -24,5 +62,25 @@
         display: flex;
         flex-direction: column;
         width: 100%;
+        gap: 1px;
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: var(--general-section-2);
+        color: var(--text-general);
+        transition: background 0.2s, color 0.2s;
+        align-self: flex-start;
+        margin-top: 2px;
     }
 }

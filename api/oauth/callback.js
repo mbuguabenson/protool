@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         }
 
         const oauth_client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
-        const legacy_app_id = process.env.DERIV_LEGACY_APP_ID || process.env.APP_ID || '33yStbGyLdNdqAyCuDk1d';
+        const legacy_app_id = process.env.DERIV_LEGACY_APP_ID || process.env.APP_ID || '113555';
 
         const redirect_uri =
             process.env.DERIV_REDIRECT_URI ||

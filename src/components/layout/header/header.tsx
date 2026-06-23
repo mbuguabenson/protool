@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { generateOAuthURL } from '@/components/shared';
 import Button from '@/components/shared_ui/button';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useApiBase } from '@/hooks/useApiBase';
-import { useLogout } from '@/hooks/useLogout';
 import { useStore } from '@/hooks/useStore';
 import { navigateToTransfer } from '@/utils/transfer-utils';
 import { Localize } from '@deriv-com/translations';
@@ -14,7 +13,7 @@ import { AppLogo } from '../app-logo';
 import { useGlobalToggle } from '@/hooks/useGlobalToggle';
 import AccountSwitcher from './account-switcher';
 import MenuItems from './menu-items';
-import MobileMenu from './mobile-menu';
+import MobileMenu, { type MobileMenuRef } from './mobile-menu';
 import './header.scss';
 
 const AppHeader = observer(() => {
@@ -23,6 +22,7 @@ const AppHeader = observer(() => {
     const { client } = useStore() ?? {};
     const [authTimeout, setAuthTimeout] = useState(false);
     const is_account_regenerating = client?.is_account_regenerating || false;
+    const mobileMenuRef = useRef<MobileMenuRef>(null);
 
     // Global toggles
     const [speedMode, setSpeedMode] = useGlobalToggle({ key: 'autoai_speed_mode', defaultValue: false });
@@ -42,7 +42,7 @@ const AppHeader = observer(() => {
         directBalance: client?.balance,
     });
 
-    const handleLogout = useLogout();
+
 
     // Clear OAuth-pending flag once the account is set (auth succeeded)
     // or after a generous timeout in case something goes wrong.
@@ -135,30 +135,90 @@ const AppHeader = observer(() => {
         navigateToTransfer(transferCurrency);
     }, [authData?.currency]);
 
+    /** Hamburger SVG — three stacked lines */
+    const HamburgerIcon = () => (
+        <svg
+            className='hamburger-icon'
+            width='22'
+            height='22'
+            viewBox='0 0 22 22'
+            fill='none'
+            xmlns='http://www.w3.org/2000/svg'
+        >
+            <rect x='2' y='5' width='18' height='2' rx='1' fill='currentColor' />
+            <rect x='2' y='10' width='18' height='2' rx='1' fill='currentColor' />
+            <rect x='2' y='15' width='18' height='2' rx='1' fill='currentColor' />
+        </svg>
+    );
+
+    /** Lightning bolt SVG for speed mode */
+    const LightningIcon = ({ active }: { active: boolean }) => (
+        <svg
+            width='13'
+            height='13'
+            viewBox='0 0 24 24'
+            fill={active ? '#fff' : 'currentColor'}
+            xmlns='http://www.w3.org/2000/svg'
+        >
+            <path d='M13 2L4.5 13.5H11L10 22L20.5 10H14L13 2Z' />
+        </svg>
+    );
+
+    /** Dollar circle SVG for currency */
+    const CurrencyIcon = ({ active }: { active: boolean }) => (
+        <svg
+            width='13'
+            height='13'
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke={active ? '#fff' : 'currentColor'}
+            strokeWidth='2'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            xmlns='http://www.w3.org/2000/svg'
+        >
+            <circle cx='12' cy='12' r='10' />
+            <path d='M12 6v2M12 16v2M9.5 9.5a2.5 2.5 0 0 1 5 0c0 2-5 2.5-5 4.5a2.5 2.5 0 0 0 5 0' />
+        </svg>
+    );
+
+    const renderToggleButtons = () => (
+        <div className='header-toggles'>
+            <button
+                id='header-speed-toggle'
+                className={clsx('header-toggle-btn', 'header-toggle-btn--speed', {
+                    'header-toggle-btn--active': speedMode,
+                })}
+                onClick={() => setSpeedMode(!speedMode)}
+                title='Speed Mode: Trade on every tick'
+            >
+                <LightningIcon active={speedMode} />
+                <span>SPEED</span>
+                <span className='header-toggle-btn__state'>{speedMode ? 'ON' : 'OFF'}</span>
+            </button>
+            <button
+                id='header-currency-toggle'
+                className={clsx('header-toggle-btn', 'header-toggle-btn--currency', {
+                    'header-toggle-btn--active': isKes,
+                })}
+                onClick={() => setIsKes(!isKes)}
+                title='Toggle Currency (USD / KES)'
+            >
+                <CurrencyIcon active={isKes} />
+                <span>{isKes ? 'KES' : 'USD'}</span>
+            </button>
+        </div>
+    );
+
     const renderAccountSection = useCallback(
         (position: 'left' | 'right' = 'right') => {
             // Show account switcher and logout when user is fully authenticated
             if (activeLoginid && !is_account_regenerating) {
                 if (position === 'left' && !isDesktop) {
-                    // For mobile left section - only account switcher
+                    // For mobile left section - toggles + account switcher
                     return (
                         <div className='auth-actions'>
-                            <div className='header-toggles'>
-                                <button
-                                    className={clsx('header-toggle-btn', { 'header-toggle-btn--active': speedMode })}
-                                    onClick={() => setSpeedMode(!speedMode)}
-                                    title="Speed Mode: Trade on every tick"
-                                >
-                                    SPEED: {speedMode ? 'ON' : 'OFF'}
-                                </button>
-                                <button
-                                    className={clsx('header-toggle-btn', { 'header-toggle-btn--active': isKes })}
-                                    onClick={() => setIsKes(!isKes)}
-                                    title="Toggle Currency (USD / KES)"
-                                >
-                                    {isKes ? 'KES' : 'USD'}
-                                </button>
-                            </div>
+                            {renderToggleButtons()}
                             <div className='account-info'>
                                 <AccountSwitcher activeAccount={activeAccount} isKes={isKes} />
                             </div>
@@ -168,22 +228,7 @@ const AppHeader = observer(() => {
                     // For right section - transfer button (and account switcher on desktop)
                     return (
                         <div className='auth-actions'>
-                            <div className='header-toggles'>
-                                <button
-                                    className={clsx('header-toggle-btn', { 'header-toggle-btn--active': speedMode })}
-                                    onClick={() => setSpeedMode(!speedMode)}
-                                    title="Speed Mode: Trade on every tick"
-                                >
-                                    SPEED: {speedMode ? 'ON' : 'OFF'}
-                                </button>
-                                <button
-                                    className={clsx('header-toggle-btn', { 'header-toggle-btn--active': isKes })}
-                                    onClick={() => setIsKes(!isKes)}
-                                    title="Toggle Currency (USD / KES)"
-                                >
-                                    {isKes ? 'KES' : 'USD'}
-                                </button>
-                            </div>
+                            {renderToggleButtons()}
                             {isDesktop && (
                                 <div className='account-info'>
                                     <AccountSwitcher activeAccount={activeAccount} isKes={isKes} />
@@ -257,6 +302,8 @@ const AppHeader = observer(() => {
             handleLogin,
             handleSignup,
             handleTransfer,
+            speedMode,
+            isKes,
         ]
     );
 
@@ -271,7 +318,18 @@ const AppHeader = observer(() => {
                 })}
             >
                 <Wrapper variant='left'>
-                    <MobileMenu onLogout={handleLogout} />
+                    {/* Hamburger button — mobile only, opens drawer */}
+                    {!isDesktop && (
+                        <button
+                            id='header-hamburger-btn'
+                            className='header-hamburger-btn'
+                            aria-label='Open navigation menu'
+                            onClick={() => mobileMenuRef.current?.openDrawer()}
+                        >
+                            <HamburgerIcon />
+                        </button>
+                    )}
+                    <MobileMenu ref={mobileMenuRef} />
                     <AppLogo />
                     {isDesktop ? <MenuItems /> : renderAccountSection('left')}
                 </Wrapper>

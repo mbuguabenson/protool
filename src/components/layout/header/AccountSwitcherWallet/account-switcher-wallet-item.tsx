@@ -99,6 +99,11 @@ export const AccountSwitcherWalletItem = observer(
                             <Localize i18n_default_text='Options' />
                         )}
                     </Text>
+                    <Text size='xs' weight='bold'>
+                        {`${formatMoney(currency ?? '', dtrade_balance || 0, true)} ${getCurrencyDisplayCode(
+                            currency
+                        )}`}
+                    </Text>
                     <Text size='xxxs'>
                         {is_virtual ? (
                             <Localize i18n_default_text='Demo Wallet' />
@@ -109,13 +114,11 @@ export const AccountSwitcherWalletItem = observer(
                             />
                         )}
                     </Text>
-                    <Text size='xs' weight='bold'>
-                        {`${formatMoney(currency ?? '', dtrade_balance || 0, true)} ${getCurrencyDisplayCode(
-                            currency
-                        )}`}
-                    </Text>
                 </div>
                 {show_badge && <WalletBadge is_demo={Boolean(is_virtual)} label={landing_company_name} />}
+                {is_dtrade_active && (
+                    <span className='acc-switcher-wallet-item__badge'>Active</span>
+                )}
             </div>
         );
     }

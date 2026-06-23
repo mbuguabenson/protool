@@ -234,7 +234,7 @@ const BrandsiteConfig = () => {
                                     name='oauth_app_id'
                                     value={config.oauth_app_id}
                                     onChange={handleChange}
-                                    placeholder="e.g. '33yStbGyLdNdqAyCuDk1d'"
+                                    placeholder='e.g. 113555'
                                     required
                                 />
                             </div>

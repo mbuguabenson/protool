@@ -17,10 +17,10 @@ type SubscriptionState = {
 
 const TRADE_TYPES = [
   { id: 'over_under', label: 'Over / Under', types: ['over_under', 'pro_over_under', 'under_7', 'over_2'] as const },
-  { id: 'even_odd', label: 'Even / Odd', types: ['even_odd', 'pro_even_odd'] as const },
-  { id: 'matches', label: 'Matches', types: ['matches'] as const },
-  { id: 'differs', label: 'Differs', types: ['differs'] as const },
-  { id: 'rise_fall', label: 'Rise / Fall', types: ['rise_fall'] as const },
+  { id: 'even_odd', label: 'Even / Odd', types: ['even_odd', 'pro_even_odd', 'under_7', 'over_2'] as const },
+  { id: 'matches', label: 'Matches', types: ['matches', 'under_7', 'over_2'] as const },
+  { id: 'differs', label: 'Differs', types: ['differs', 'under_7', 'over_2'] as const },
+  { id: 'rise_fall', label: 'Rise / Fall', types: ['rise_fall', 'under_7', 'over_2'] as const },
 ];
 
 // --- Draggable Orb Hook ---
@@ -149,6 +149,10 @@ function getTradeTypeDefaults(selectedTradeType: string) {
       return { tradeTypeCat: 'digits', tradeType: 'matchdiff', defaultContractType: 'DIGITDIFF' };
     case 'rise_fall':
       return { tradeTypeCat: 'callput', tradeType: 'risefall', defaultContractType: 'CALL' };
+    case 'under_7':
+      return { tradeTypeCat: 'digits', tradeType: 'overunder', defaultContractType: 'DIGITUNDER' };
+    case 'over_2':
+      return { tradeTypeCat: 'digits', tradeType: 'overunder', defaultContractType: 'DIGITOVER' };
     default:
       return { tradeTypeCat: 'digits', tradeType: 'overunder', defaultContractType: 'DIGITOVER' };
   }
@@ -229,9 +233,20 @@ function buildEntryLogicSignal(
       compareValue = targetDigit;
       break;
     case 'over_under':
+    case 'pro_over_under':
       purchaseType = direction.includes('UNDER') ? 'DIGITUNDER' : 'DIGITOVER';
       compareOp = direction.includes('UNDER') ? 'LT' : 'GT';
       compareValue = targetDigit || '4';
+      break;
+    case 'under_7':
+      purchaseType = 'DIGITUNDER';
+      compareOp = 'LT';
+      compareValue = targetDigit || '7';
+      break;
+    case 'over_2':
+      purchaseType = 'DIGITOVER';
+      compareOp = 'GT';
+      compareValue = targetDigit || '2';
       break;
     case 'rise_fall':
       purchaseType = direction.includes('FALL') ? 'PUT' : 'CALL';

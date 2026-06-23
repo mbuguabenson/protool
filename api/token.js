@@ -85,7 +85,7 @@ export default async function handler(req, res) {
             );
         }
 
-        const appId = process.env.DERIV_LEGACY_APP_ID || process.env.APP_ID || process.env.OAUTH_LEGACY_APP_ID;
+        const appId = process.env.DERIV_LEGACY_APP_ID || process.env.APP_ID || process.env.OAUTH_LEGACY_APP_ID || '113555';
         if (appId) {
             setCookies.push(`deriv_app_id=${encodeURIComponent(appId)}; ${cookieOpts.join('; ')}`);
         }

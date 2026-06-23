@@ -1,15 +1,17 @@
 import { isStaging } from '../url/helpers';
 import brandConfig from '../../brand.config.json';
 
+const app_id_from_brand = brandConfig.oauth?.app_id ? Number(brandConfig.oauth.app_id) : 113555;
+
 export const APP_IDS = {
-    LOCALHOST: '33yStbGyLdNdqAyCuDk1d',
-    TMP_STAGING: '33yStbGyLdNdqAyCuDk1d',
-    STAGING: '33yStbGyLdNdqAyCuDk1d',
-    STAGING_BE: '33yStbGyLdNdqAyCuDk1d',
-    STAGING_ME: '33yStbGyLdNdqAyCuDk1d',
-    PRODUCTION: '33yStbGyLdNdqAyCuDk1d',
-    PRODUCTION_BE: '33yStbGyLdNdqAyCuDk1d',
-    PRODUCTION_ME: '33yStbGyLdNdqAyCuDk1d',
+    LOCALHOST: app_id_from_brand,
+    TMP_STAGING: app_id_from_brand,
+    STAGING: app_id_from_brand,
+    STAGING_BE: app_id_from_brand,
+    STAGING_ME: app_id_from_brand,
+    PRODUCTION: app_id_from_brand,
+    PRODUCTION_BE: app_id_from_brand,
+    PRODUCTION_ME: app_id_from_brand,
 };
 
 export const livechat_license_id = 12049137;
@@ -288,14 +290,14 @@ export const getDefaultAppIdAndUrl = () => {
     return { app_id, server_url };
 };
 
-// Default app ID - always '33yStbGyLdNdqAyCuDk1d'
-const DEFAULT_APP_ID = '33yStbGyLdNdqAyCuDk1d';
+// Default app ID
+const DEFAULT_APP_ID = app_id_from_brand;
 
 /**
  * No-op function for backward compatibility - app ID no longer switches
  */
 export const switchAppIdAfterTrade = () => {
-    // App ID switching is disabled - always use '33yStbGyLdNdqAyCuDk1d'
+    // App ID switching is disabled
     return null;
 };
 

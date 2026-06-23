@@ -82,7 +82,7 @@
         "token_url": "https://auth.deriv.com/oauth2/token",
         "redirect_uri": "https://protooldbot.vercel.app/callback",
         "client_id": "33yStbGyLdNdqAyCuDk1d",
-        "app_id": "33yStbGyLdNdqAyCuDk1d",
+        "app_id": 113555,
         "scope": "trade account_manage"
     },
     "platform": {
