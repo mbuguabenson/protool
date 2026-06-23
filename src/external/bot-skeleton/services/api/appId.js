@@ -185,9 +185,11 @@ export const generateDerivApiInstance = (specificAppId = null) => {
                     delegating_socket.connectedAccountId = targetAccount.account_id;
                     console.log(`✅ [appId.js] Switched to OTP connection for ${targetAccount.account_id}`);
                 } catch (err) {
-                    console.error(`❌ [appId.js] Failed to switch to OTP connection for ${targetAccount.account_id}:`, err);
-                    // Return soft error without code 'InvalidToken' so we don't trigger the login loop
-                    return { authorize: null, error: { code: 'OTPSwitchFailed', message: err?.message || String(err) } };
+                    // OTP switch failed, but we already have account info from REST.
+                    // Do NOT fail authorization — let the user be logged in.
+                    // The public WS connection remains active; trading calls will
+                    // attempt to get a fresh OTP URL when needed.
+                    console.warn(`⚠️ [appId.js] OTP switch failed for ${targetAccount.account_id}, continuing with REST auth:`, err?.message || err);
                 }
             }
 
@@ -212,6 +214,7 @@ export const generateDerivApiInstance = (specificAppId = null) => {
                 scopes: ['trade', 'read'],
             };
 
+            console.log(`✅ [appId.js] Authorization complete for ${targetAccount.account_id}`);
             return { authorize, error: null };
         }
 

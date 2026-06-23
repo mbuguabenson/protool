@@ -332,7 +332,7 @@ class APIBase {
                 // OIDC-specific soft errors (AccountsFetchFailed, NoAccountsFound, OTPSwitchFailed)
                 // should NOT trigger re-login — they mean the WS is not authorized but the
                 // app can still render and the user can retry manually.
-                const SOFT_ERROR_CODES = ['AccountsFetchFailed', 'NoAccountsFound', 'OTPSwitchFailed'];
+                const SOFT_ERROR_CODES = ['AccountsFetchFailed', 'NoAccountsFound'];
                 const errorCode = error?.code || (error instanceof Error ? 'Error' : String(error));
                 if (SOFT_ERROR_CODES.includes(errorCode)) {
                     console.warn(`[api-base] Soft authorization error (${errorCode}):`, error.message || error);
