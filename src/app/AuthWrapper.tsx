@@ -486,6 +486,10 @@ export const AuthWrapper = () => {
                     // don't keep trying to authorize with an invalid token.
                     if (isOidcJwt) {
                         localStorage.removeItem('authToken');
+                        // CRITICAL: Also clear logged_state cookie to prevent setLocalStorageToken
+                        // from emitting InvalidToken (which causes the infinite OAuth redirect loop)
+                        Cookies.remove('logged_state', { path: '/' });
+                        Cookies.set('logged_state', 'false', { path: '/', expires: 30 });
                     }
                 }
             }

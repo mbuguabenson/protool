@@ -11,9 +11,20 @@ import { ErrorLogger } from '@/utils/error-logger';
  *
  * @returns {{ unregisterHandler: () => void }} An object containing a function to unregister the event handler
  */
+const INVALID_TOKEN_COOLDOWN_MS = 30_000; // 30 seconds between re-login attempts
+let lastInvalidTokenAt = 0;
+
 export const useInvalidTokenHandler = (): { unregisterHandler: () => void } => {
     const handleInvalidToken = async () => {
         try {
+            // Rate limit: prevent rapid re-login loops
+            const now = Date.now();
+            if (now - lastInvalidTokenAt < INVALID_TOKEN_COOLDOWN_MS) {
+                console.warn('[InvalidToken] Throttled - too soon since last redirect. Skipping.');
+                return;
+            }
+            lastInvalidTokenAt = now;
+
             // Clear invalid session data to prevent infinite reload loop
             sessionStorage.removeItem('auth_info');
             localStorage.removeItem('active_loginid');

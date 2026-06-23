@@ -155,16 +155,26 @@ export const generateDerivApiInstance = (specificAppId = null) => {
             
             let accounts = [];
             try {
+                // Clear cached promise so we always get a fresh fetch on new connections
+                DerivWSAccountsService.clearCache();
                 accounts = await DerivWSAccountsService.fetchAccountsList(token);
             } catch (err) {
                 console.error('❌ [appId.js] Failed to fetch accounts list via REST:', err);
-                return { authorize: null, error: err };
+                // Fall back to sessionStorage cached accounts to avoid auth failure loop
+                const stored = DerivWSAccountsService.getStoredAccounts();
+                if (stored && stored.length > 0) {
+                    console.warn('⚠️ [appId.js] Using cached accounts from sessionStorage as fallback.');
+                    accounts = stored;
+                } else {
+                    // No fallback available - return a soft error that does NOT trigger InvalidToken
+                    return { authorize: null, error: { code: 'AccountsFetchFailed', message: err?.message || String(err) } };
+                }
             }
 
             const targetAccount = accounts.find(a => a.account_id === targetAccountId) || accounts[0];
             if (!targetAccount) {
-                const err = new Error('No options accounts found for this token.');
-                return { authorize: null, error: err };
+                console.error('❌ [appId.js] No options accounts found. Check your Deriv account has an options trading account.');
+                return { authorize: null, error: { code: 'NoAccountsFound', message: 'No options accounts found for this token.' } };
             }
 
             if (delegating_socket.connectedAccountId !== targetAccount.account_id) {
@@ -176,7 +186,8 @@ export const generateDerivApiInstance = (specificAppId = null) => {
                     console.log(`✅ [appId.js] Switched to OTP connection for ${targetAccount.account_id}`);
                 } catch (err) {
                     console.error(`❌ [appId.js] Failed to switch to OTP connection for ${targetAccount.account_id}:`, err);
-                    return { authorize: null, error: err };
+                    // Return soft error without code 'InvalidToken' so we don't trigger the login loop
+                    return { authorize: null, error: { code: 'OTPSwitchFailed', message: err?.message || String(err) } };
                 }
             }
 

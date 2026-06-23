@@ -35,6 +35,59 @@ export default async function handler(req, res) {
             return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
         }
 
+        // Check if the access token has expired
+        const token_expires_str = cookies.deriv_token_expires;
+        if (token_expires_str) {
+            const token_expires = parseInt(token_expires_str, 10);
+            if (!isNaN(token_expires) && Date.now() >= token_expires) {
+                // Token expired - try to refresh it first
+                const refresh_token = cookies.deriv_refresh_token;
+                if (refresh_token) {
+                    console.log('[Session] Access token expired. Attempting token refresh...');
+                    try {
+                        const refreshResp = await fetch('https://auth.deriv.com/oauth2/token', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({
+                                grant_type: 'refresh_token',
+                                refresh_token,
+                                client_id: oauth_client_id,
+                            }).toString(),
+                        });
+                        if (refreshResp.ok) {
+                            const newTokenData = await refreshResp.json();
+                            if (newTokenData.access_token) {
+                                // Update access_token for this request
+                                // Note: The response will set new cookies too
+                                const maxAge = Number(newTokenData.expires_in) || 3600;
+                                const cookieOpts = ['HttpOnly', 'Path=/', 'SameSite=Lax', 'Secure'];
+                                res.setHeader('Set-Cookie', [
+                                    `deriv_access_token=${encodeURIComponent(newTokenData.access_token)}; ${cookieOpts.join('; ')}; Max-Age=${maxAge}`,
+                                    `deriv_token_expires=${Date.now() + maxAge * 1000}; ${cookieOpts.join('; ')}`,
+                                    ...(newTokenData.refresh_token ? [`deriv_refresh_token=${encodeURIComponent(newTokenData.refresh_token)}; ${cookieOpts.join('; ')}; Max-Age=604800`] : []),
+                                ]);
+                                // Use the new access token for this request
+                                cookies.deriv_access_token = newTokenData.access_token;
+                                console.log('[Session] Token refreshed successfully.');
+                            } else {
+                                console.warn('[Session] Token refresh response missing access_token. Returning logged_in: false.');
+                                return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+                            }
+                        } else {
+                            console.warn('[Session] Token refresh failed. Returning logged_in: false.');
+                            return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+                        }
+                    } catch (refreshErr) {
+                        console.error('[Session] Token refresh error:', refreshErr);
+                        return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+                    }
+                } else {
+                    console.log('[Session] Access token expired and no refresh token. Returning logged_in: false.');
+                    return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+                }
+            }
+        }
+
         const account_headers = {
             Authorization: `Bearer ${access_token}`,
             'Content-Type': 'application/json',

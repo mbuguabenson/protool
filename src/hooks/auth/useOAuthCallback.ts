@@ -154,15 +154,12 @@ export const useOAuthCallback = (): OAuthCallbackResult => {
         }
 
         if (!validateCSRFToken(state)) {
-            console.error('[OAuth] CSRF token validation failed');
+            console.error('[OAuth] CSRF token validation failed - redirecting to root to allow re-login');
             clearAuthData();
-            setResult({
-                isProcessing: false,
-                isValid: false,
-                params: { code, state, error, error_description },
-                legacyAccounts: [],
-                error: 'CSRF token validation failed',
-            });
+            // Don't leave the user stuck on /callback. Redirect to root so they can
+            // re-initiate login cleanly. This handles cases where the session was
+            // cleared (e.g., new tab, session expired) or page was refreshed mid-flow.
+            window.location.replace(window.location.origin);
             return;
         }
 
