@@ -64,8 +64,8 @@ const FormikWrapper: React.FC<TFormikWrapper> = observer(({ children }) => {
         const data = getSavedValues();
         initial_value = {
             symbol: data?.symbol ?? qs_config().QUICK_STRATEGY.DEFAULT.symbol,
-            tradetype: data?.tradetype ?? '',
-            type: data?.type ?? '',
+            tradetype: data?.tradetype ?? qs_config().QUICK_STRATEGY.DEFAULT.tradetype ?? 'RISEFALL', // Fallback to RISEFALL if not defined
+            type: data?.type ?? qs_config().QUICK_STRATEGY.DEFAULT.type ?? '', // Keep empty if truly undefined
             durationtype: data?.durationtype ?? qs_config().QUICK_STRATEGY.DEFAULT.durationtype,
             duration: data?.duration ?? '1',
             stake: data?.stake ?? '1',
@@ -84,6 +84,7 @@ const FormikWrapper: React.FC<TFormikWrapper> = observer(({ children }) => {
             max_payout: data?.max_payout ?? 0,
             max_ticks: data?.max_ticks ?? 0,
         };
+        console.log('[QuickStrategy] Initialized form values:', initial_value);
         return initial_value;
     };
 
