@@ -149,7 +149,7 @@ export const getBotsManifest = async (): Promise<TBotsManifestItem[] | null> => 
         // Try domain-specific manifest first
         const domainUrl = `/xml/${encodeURIComponent(domain)}/bots.json`;
         let data = await fetchJsonManifest(domainUrl);
-        
+
         if (data) {
             setXmlBase(`/xml/${domain}/`);
         } else {

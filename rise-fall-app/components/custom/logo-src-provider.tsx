@@ -4,18 +4,8 @@ import { createContext, useContext } from 'react';
 
 const LogoSrcContext = createContext<string | null>(null);
 
-export function LogoSrcProvider({
-  logoSrc,
-  children,
-}: {
-  logoSrc: string | null;
-  children: React.ReactNode;
-}) {
-  return (
-    <LogoSrcContext.Provider value={logoSrc}>
-      {children}
-    </LogoSrcContext.Provider>
-  );
+export function LogoSrcProvider({ logoSrc, children }: { logoSrc: string | null; children: React.ReactNode }) {
+    return <LogoSrcContext.Provider value={logoSrc}>{children}</LogoSrcContext.Provider>;
 }
 
 /**
@@ -24,5 +14,5 @@ export function LogoSrcProvider({
  * when this returns undefined.
  */
 export function useLogoSrc(): string | undefined {
-  return useContext(LogoSrcContext) ?? undefined;
+    return useContext(LogoSrcContext) ?? undefined;
 }

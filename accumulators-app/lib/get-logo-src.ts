@@ -13,11 +13,11 @@ import path from 'path';
  * the result down via LogoSrcProvider.
  */
 export function getLogoSrc(): string | null {
-  const publicDir = path.join(process.cwd(), 'public');
-  for (const ext of ['png', 'jpg', 'jpeg', 'webp']) {
-    if (fs.existsSync(path.join(publicDir, `logo.${ext}`))) {
-      return `/logo.${ext}`;
+    const publicDir = path.join(process.cwd(), 'public');
+    for (const ext of ['png', 'jpg', 'jpeg', 'webp']) {
+        if (fs.existsSync(path.join(publicDir, `logo.${ext}`))) {
+            return `/logo.${ext}`;
+        }
     }
-  }
-  return null;
+    return null;
 }

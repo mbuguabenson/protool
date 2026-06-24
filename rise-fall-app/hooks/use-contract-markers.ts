@@ -16,12 +16,12 @@ import { calculateContractMarkers, type ContractMarker } from '@/lib/chart-marke
  * @returns Array of ContractMarker objects for SmartCharts
  */
 export function useContractMarkers(
-  positions: OpenPosition[],
-  activeSymbol: string | undefined,
-  isMobile = false
+    positions: OpenPosition[],
+    activeSymbol: string | undefined,
+    isMobile = false
 ): ContractMarker[] {
-  return useMemo(
-    () => calculateContractMarkers(positions, activeSymbol, isMobile),
-    [positions, activeSymbol, isMobile]
-  );
+    return useMemo(
+        () => calculateContractMarkers(positions, activeSymbol, isMobile),
+        [positions, activeSymbol, isMobile]
+    );
 }

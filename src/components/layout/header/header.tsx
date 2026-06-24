@@ -42,8 +42,6 @@ const AppHeader = observer(() => {
         directBalance: client?.balance,
     });
 
-
-
     // Clear OAuth-pending flag once the account is set (auth succeeded)
     // or after a generous timeout in case something goes wrong.
     useEffect(() => {

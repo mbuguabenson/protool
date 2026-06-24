@@ -15,18 +15,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const TEMPLATE_ROOT = process.cwd();
-const SOURCE = path.resolve(
-  TEMPLATE_ROOT,
-  './node_modules/@deriv-com/smartcharts-champion/dist'
-);
+const SOURCE = path.resolve(TEMPLATE_ROOT, './node_modules/@deriv-com/smartcharts-champion/dist');
 const DEST = path.join(TEMPLATE_ROOT, 'public');
 
 if (!fs.existsSync(SOURCE)) {
-  console.warn(
-    `[copy-smartcharts-assets] skip: source not found at ${SOURCE}. ` +
-      `Run \`npm install\` at the repo root first.`
-  );
-  process.exit(0);
+    console.warn(
+        `[copy-smartcharts-assets] skip: source not found at ${SOURCE}. ` +
+            `Run \`npm install\` at the repo root first.`
+    );
+    process.exit(0);
 }
 
 fs.mkdirSync(DEST, { recursive: true });

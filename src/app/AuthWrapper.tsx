@@ -138,20 +138,23 @@ const restoreLoginFromServerSession = async () => {
         try {
             const token = localStorage.getItem('authToken') || '';
             const accounts = await DerivWSAccountsService.fetchAccountsList(token);
-            const mappedAccounts: TAccount[] = accounts.map(a => ({
-                loginid: a.account_id,
-                currency: a.currency,
-                account_type: a.account_type,
-                is_virtual: a.account_type === 'demo' ? 1 : 0,
-                balance: parseFloat(a.balance || '0'),
-                account_category: 'trading',
-                broker: 'Deriv',
-                created_at: 0,
-                currency_type: 'fiat',
-                is_disabled: 0,
-                landing_company_name: 'svg',
-                linked_to: [],
-            } as any));
+            const mappedAccounts: TAccount[] = accounts.map(
+                a =>
+                    ({
+                        loginid: a.account_id,
+                        currency: a.currency,
+                        account_type: a.account_type,
+                        is_virtual: a.account_type === 'demo' ? 1 : 0,
+                        balance: parseFloat(a.balance || '0'),
+                        account_category: 'trading',
+                        broker: 'Deriv',
+                        created_at: 0,
+                        currency_type: 'fiat',
+                        is_disabled: 0,
+                        landing_company_name: 'svg',
+                        linked_to: [],
+                    }) as any
+            );
             setAccountList(mappedAccounts);
 
             const activeLoginId = localStorage.getItem('active_loginid') || accounts[0]?.account_id || '';
@@ -186,7 +189,10 @@ const restoreLoginFromServerSession = async () => {
             const fetchedAccounts = await DerivWSAccountsService.fetchAccountsList(sessionToken);
             if (fetchedAccounts && fetchedAccounts.length) {
                 const accountsListFromOAuth: Record<string, string> = {};
-                const clientAccountsFromOAuth: Record<string, { loginid: string; token: string; currency: string; account_type?: string; balance?: string }> = {};
+                const clientAccountsFromOAuth: Record<
+                    string,
+                    { loginid: string; token: string; currency: string; account_type?: string; balance?: string }
+                > = {};
                 fetchedAccounts.forEach(acc => {
                     accountsListFromOAuth[acc.account_id] = sessionToken;
                     clientAccountsFromOAuth[acc.account_id] = {
@@ -391,20 +397,23 @@ const setLocalStorageToken = async (
                 // After API initialization, fetch full account list (including balances) and sync with client store
                 try {
                     const accounts = await DerivWSAccountsService.fetchAccountsList(selectedToken);
-                    const mappedAccounts: TAccount[] = accounts.map(a => ({
-                        loginid: a.account_id,
-                        currency: a.currency,
-                        account_type: a.account_type,
-                        is_virtual: a.account_type === 'demo' ? 1 : 0,
-                        balance: parseFloat(a.balance || '0'),
-                        account_category: 'trading',
-                        broker: 'Deriv',
-                        created_at: 0,
-                        currency_type: 'fiat',
-                        is_disabled: 0,
-                        landing_company_name: 'svg',
-                        linked_to: [],
-                    } as any));
+                    const mappedAccounts: TAccount[] = accounts.map(
+                        a =>
+                            ({
+                                loginid: a.account_id,
+                                currency: a.currency,
+                                account_type: a.account_type,
+                                is_virtual: a.account_type === 'demo' ? 1 : 0,
+                                balance: parseFloat(a.balance || '0'),
+                                account_category: 'trading',
+                                broker: 'Deriv',
+                                created_at: 0,
+                                currency_type: 'fiat',
+                                is_disabled: 0,
+                                landing_company_name: 'svg',
+                                linked_to: [],
+                            }) as any
+                    );
                     setAccountList(mappedAccounts);
 
                     const activeAcc = accounts.find(a => a.account_id === selectedLoginId) || accounts[0];
@@ -463,7 +472,10 @@ const setLocalStorageToken = async (
 
 export const AuthWrapper = () => {
     const [isAuthComplete, setIsAuthComplete] = React.useState(false);
-    const { loginInfo, paramsToDelete } = URLUtils.getLoginInfoFromURL() as { loginInfo: LoginInfo[]; paramsToDelete: string[] };
+    const { loginInfo, paramsToDelete } = URLUtils.getLoginInfoFromURL() as {
+        loginInfo: LoginInfo[];
+        paramsToDelete: string[];
+    };
 
     React.useEffect(() => {
         const initializeAuth = async () => {

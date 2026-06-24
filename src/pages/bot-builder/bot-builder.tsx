@@ -16,7 +16,6 @@ import WorkspaceWrapper from './workspace-wrapper';
 import AutoAiScanner from '@/components/AutoAiScanner';
 import { load, save_types } from '@/external/bot-skeleton';
 
-
 const BotBuilder = observer(() => {
     const { dashboard, app, run_panel, toolbar, quick_strategy, blockly_store } = useStore();
     const { active_tab, active_tour, is_preview_on_popup } = dashboard;
@@ -42,10 +41,13 @@ const BotBuilder = observer(() => {
         window.Blockly.derivWorkspace.strategy_to_load = xml;
     }, []);
 
-    const handleLoadAndRun = React.useCallback(async (xml: string) => {
-        await handleLoadBot(xml);
-        onRunButtonClick();
-    }, [handleLoadBot, onRunButtonClick]);
+    const handleLoadAndRun = React.useCallback(
+        async (xml: string) => {
+            await handleLoadBot(xml);
+            onRunButtonClick();
+        },
+        [handleLoadBot, onRunButtonClick]
+    );
 
     // TODO: fix
     // const isMounted = useIsMounted();
@@ -149,7 +151,9 @@ const BotBuilder = observer(() => {
             <LoadModal />
             <SaveModal />
             {is_open && <QuickStrategy1 />}
-            {active_tab === DBOT_TABS.BOT_BUILDER && <AutoAiScanner onLoadBot={handleLoadBot} onLoadAndRun={handleLoadAndRun} />}
+            {active_tab === DBOT_TABS.BOT_BUILDER && (
+                <AutoAiScanner onLoadBot={handleLoadBot} onLoadAndRun={handleLoadAndRun} />
+            )}
         </>
     );
 });

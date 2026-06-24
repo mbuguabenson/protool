@@ -100,8 +100,11 @@ const CallbackPage = () => {
                 let is_token_set = false;
                 if (tokens.token1) {
                     localStorage.setItem('authToken', tokens.token1);
+                    // 🔧 CRITICAL FIX: Store with the key that WebSocket manager expects
+                    localStorage.setItem('deriv_api_token', tokens.token1);
+                    localStorage.setItem('oauth_flow_type', 'legacy');
                 }
-                const api = await generateDerivApiInstance() as any;
+                const api = (await generateDerivApiInstance()) as any;
                 if (api) {
                     const { authorize, error } = await api.authorize(tokens.token1);
                     api.disconnect();
@@ -126,7 +129,9 @@ const CallbackPage = () => {
                         if (filteredTokens.length) {
                             const selectedAccount = filteredTokens[0];
                             localStorage.setItem('authToken', selectedAccount.token);
+                            localStorage.setItem('deriv_api_token', selectedAccount.token);
                             localStorage.setItem('active_loginid', selectedAccount.loginid);
+                            localStorage.setItem('active_login_id', selectedAccount.loginid);
                             selectedLoginId = selectedAccount.loginid;
                             selectedAccountType = selectedAccount.account_type;
                             is_token_set = true;
@@ -139,7 +144,9 @@ const CallbackPage = () => {
                     selectedLoginId = finalAccount.loginid;
                     selectedAccountType = selectedAccountType || finalAccount.account_type;
                     localStorage.setItem('authToken', finalAccount.token);
+                    localStorage.setItem('deriv_api_token', finalAccount.token);
                     localStorage.setItem('active_loginid', finalAccount.loginid);
+                    localStorage.setItem('active_login_id', finalAccount.loginid);
                     if (finalAccount.account_type) {
                         localStorage.setItem('account_type', finalAccount.account_type);
                     }
@@ -148,7 +155,9 @@ const CallbackPage = () => {
 
                 if (!is_token_set && finalAccount) {
                     localStorage.setItem('authToken', finalAccount.token);
+                    localStorage.setItem('deriv_api_token', finalAccount.token);
                     localStorage.setItem('active_loginid', finalAccount.loginid);
+                    localStorage.setItem('active_login_id', finalAccount.loginid);
                 }
 
                 Cookies.set('logged_state', 'true', {

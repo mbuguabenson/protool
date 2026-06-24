@@ -6,6 +6,4 @@ import './index.css';
 
 AnalyticsInitializer();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <AuthWrapper />
-);
+ReactDOM.createRoot(document.getElementById('root')!).render(<AuthWrapper />);

@@ -61,7 +61,7 @@ const AccountSwitcher = observer(({ activeAccount, isKes }: ExtendedAccountSwitc
                 const rawBalance = Number((account.balance ?? 0).toString().replace(/,/g, ''));
                 const displayBalance = isKes ? rawBalance * 130 : rawBalance;
                 const displayCurrency = isKes ? 'KES' : account.currency;
-                
+
                 return {
                     loginid: account.loginid,
                     currency: displayCurrency,
@@ -134,7 +134,7 @@ const AccountSwitcher = observer(({ activeAccount, isKes }: ExtendedAccountSwitc
                                     const rawBalance = Number((balance ?? '0').toString().replace(/,/g, ''));
                                     const displayBalance = isKes ? rawBalance * 130 : rawBalance;
                                     const displayCurrency = isKes ? 'KES' : currency;
-                                    
+
                                     return (
                                         <p
                                             data-testid='dt_balance'

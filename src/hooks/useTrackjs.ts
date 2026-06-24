@@ -14,7 +14,8 @@ const useTrackjs = () => {
         // Abort if token is missing – prevents TrackJS missing‑token warnings.
         if (!TRACKJS_TOKEN) {
             // eslint-disable-next-line no-console
-           if (window.TrackJS && window.TrackJS.console) window.TrackJS.console.log('TrackJS token is not set; skipping TrackJS initialization');
+            if (window.TrackJS && window.TrackJS.console)
+                window.TrackJS.console.log('TrackJS token is not set; skipping TrackJS initialization');
             return;
         }
         try {

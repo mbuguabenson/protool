@@ -49,7 +49,12 @@ export default async function handler(req, res) {
             return res.status(500).send('Server not configured for OAuth');
         }
 
-        console.log('[Callback] Initiating token exchange. OAuth Client ID:', oauth_client_id, 'Redirect URI:', redirect_uri);
+        console.log(
+            '[Callback] Initiating token exchange. OAuth Client ID:',
+            oauth_client_id,
+            'Redirect URI:',
+            redirect_uri
+        );
 
         const params = new URLSearchParams({
             grant_type: 'authorization_code',
@@ -142,7 +147,9 @@ export default async function handler(req, res) {
 
                 // Auto-create demo options account if none found
                 if (accountResponse && accountResponse.ok && accounts.length === 0) {
-                    console.log('[Callback] No options accounts found. Attempting to auto-create demo options account...');
+                    console.log(
+                        '[Callback] No options accounts found. Attempting to auto-create demo options account...'
+                    );
                     const createResponse = await fetch('https://api.derivws.com/trading/v1/options/accounts', {
                         method: 'POST',
                         headers: accountHeaders,
@@ -159,7 +166,8 @@ export default async function handler(req, res) {
                         }).catch(() => null);
                         if (refetchResponse && refetchResponse.ok) {
                             const refetchData = await refetchResponse.json();
-                            const refetchAccounts = refetchData.data || refetchData.accounts || refetchData.trading_accounts || [];
+                            const refetchAccounts =
+                                refetchData.data || refetchData.accounts || refetchData.trading_accounts || [];
                             accounts = refetchAccounts
                                 .map(account => ({
                                     loginid: account.account_id || account.loginid || account.login_id || '',
@@ -172,7 +180,11 @@ export default async function handler(req, res) {
                         }
                     } else {
                         const createErrData = await createResponse.json().catch(() => ({}));
-                        console.error('[Callback] Failed to auto-create demo options account:', createResponse.status, createErrData);
+                        console.error(
+                            '[Callback] Failed to auto-create demo options account:',
+                            createResponse.status,
+                            createErrData
+                        );
                     }
                 }
             } catch (err) {

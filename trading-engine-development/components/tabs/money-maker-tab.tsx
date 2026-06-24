@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import type { DerivSymbol } from '@/hooks/use-deriv';
 
-
 interface MoneyMakerTabProps {
     recentDigits: number[];
     currentDigit: number | null;
@@ -42,7 +41,6 @@ export function MoneyMakerTab({
     const [useMartingale, setUseMartingale] = useState(false);
     const [autoTrading, setAutoTrading] = useState(false);
     const [transactionHistory, setTransactionHistory] = useState<any[]>([]);
-
 
     // Analyze last 500, 60, and 15 ticks
     const last500 = recentDigits.slice(-500);
@@ -244,8 +242,6 @@ export function MoneyMakerTab({
 
     return (
         <div className='space-y-6'>
-
-
             {/* Header */}
             <div className='soft-card p-4 border-white/5 flex items-center justify-between gap-4'>
                 <div className='flex items-center gap-2'>

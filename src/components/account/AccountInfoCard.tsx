@@ -17,8 +17,8 @@ export const AccountInfoCard = observer(() => {
 
     if (!loginid) {
         return (
-            <div className="account-info-card loading-state">
-                <div className="card-pulse-loader" />
+            <div className='account-info-card loading-state'>
+                <div className='card-pulse-loader' />
                 <p>Retrieving active account details...</p>
             </div>
         );
@@ -28,11 +28,11 @@ export const AccountInfoCard = observer(() => {
 
     return (
         <div className={`account-info-card ${isDemo ? 'is-demo' : 'is-real'}`}>
-            <div className="card-glass-glow" />
-            <div className="card-content">
-                <div className="card-header-section">
-                    <div className="header-title-group">
-                        <Wallet className="header-icon" size={20} />
+            <div className='card-glass-glow' />
+            <div className='card-content'>
+                <div className='card-header-section'>
+                    <div className='header-title-group'>
+                        <Wallet className='header-icon' size={20} />
                         <h3>Active Trading Account</h3>
                     </div>
                     <span className={`status-badge ${isDemo ? 'demo-badge' : 'real-badge'}`}>
@@ -40,36 +40,36 @@ export const AccountInfoCard = observer(() => {
                     </span>
                 </div>
 
-                <div className="balance-display-section">
-                    <span className="balance-label">Available Balance</span>
-                    <h2 className="balance-amount">
-                        <span className="currency-symbol">
+                <div className='balance-display-section'>
+                    <span className='balance-label'>Available Balance</span>
+                    <h2 className='balance-amount'>
+                        <span className='currency-symbol'>
                             {currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : ''}
                         </span>
                         {parseFloat(balance).toLocaleString(undefined, {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                         })}
-                        <span className="currency-code">{currency}</span>
+                        <span className='currency-code'>{currency}</span>
                     </h2>
                 </div>
 
-                <div className="details-grid">
-                    <div className="detail-item">
-                        <span className="detail-label">Account ID</span>
-                        <div className="detail-value copyable" onClick={handleCopy}>
-                            <User size={14} className="detail-icon" />
+                <div className='details-grid'>
+                    <div className='detail-item'>
+                        <span className='detail-label'>Account ID</span>
+                        <div className='detail-value copyable' onClick={handleCopy}>
+                            <User size={14} className='detail-icon' />
                             <span>{loginid}</span>
-                            <button className="copy-action-btn" type="button" aria-label="Copy Account ID">
-                                {copied ? <Check size={14} className="success-icon" /> : <Copy size={14} />}
+                            <button className='copy-action-btn' type='button' aria-label='Copy Account ID'>
+                                {copied ? <Check size={14} className='success-icon' /> : <Copy size={14} />}
                             </button>
                         </div>
                     </div>
 
-                    <div className="detail-item">
-                        <span className="detail-label">Authentication</span>
-                        <div className="detail-value secure">
-                            <ShieldCheck size={14} className="detail-icon secure-icon" />
+                    <div className='detail-item'>
+                        <span className='detail-label'>Authentication</span>
+                        <div className='detail-value secure'>
+                            <ShieldCheck size={14} className='detail-icon secure-icon' />
                             <span>Authorized</span>
                         </div>
                     </div>

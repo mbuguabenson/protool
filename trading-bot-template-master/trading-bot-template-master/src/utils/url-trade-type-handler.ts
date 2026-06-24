@@ -104,8 +104,8 @@ export const getTradeTypeFromUrlParam = (urlParam: string): TradeTypeFromUrl => 
     const isValidCategory = Boolean(tradeTypeCategory && tradeTypeCategory in TRADE_TYPE_CATEGORIES);
     const isValidTradeType = Boolean(
         tradeType &&
-        isValidCategory &&
-        TRADE_TYPE_CATEGORIES[tradeTypeCategory as keyof typeof TRADE_TYPE_CATEGORIES].includes(tradeType)
+            isValidCategory &&
+            TRADE_TYPE_CATEGORIES[tradeTypeCategory as keyof typeof TRADE_TYPE_CATEGORIES].includes(tradeType)
     );
 
     return {

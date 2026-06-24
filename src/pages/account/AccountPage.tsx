@@ -63,7 +63,9 @@ const AccountPage = observer(() => {
 
     const [isKes] = useGlobalToggle({ key: 'currency_mode_kes', defaultValue: false });
 
-    const [activeTab, setActiveTab] = useState<'statement' | 'deposits' | 'withdrawals' | 'pnl' | 'strategies' | 'settings'>('statement');
+    const [activeTab, setActiveTab] = useState<
+        'statement' | 'deposits' | 'withdrawals' | 'pnl' | 'strategies' | 'settings'
+    >('statement');
     const [statement, setStatement] = useState<StatementEntry[]>([]);
     const [profitTable, setProfitTable] = useState<ProfitEntry[]>([]);
     const [accountInfo, setAccountInfo] = useState<AccountInfo>({});
@@ -173,7 +175,8 @@ const AccountPage = observer(() => {
                 balance: balance_resp?.balance?.balance ?? 0,
                 email: settings?.get_settings?.email || '',
                 country: settings?.get_settings?.country || '',
-                full_name: `${settings?.get_settings?.first_name || ''} ${settings?.get_settings?.last_name || ''}`.trim(),
+                full_name:
+                    `${settings?.get_settings?.first_name || ''} ${settings?.get_settings?.last_name || ''}`.trim(),
             });
         } catch (e: any) {
             // Silent - just use client store data
@@ -233,9 +236,11 @@ const AccountPage = observer(() => {
                 va = new Date(a.date).getTime();
                 vb = new Date(b.date).getTime();
             } else if (sortField === 'amount') {
-                va = a.amount; vb = b.amount;
+                va = a.amount;
+                vb = b.amount;
             } else {
-                va = a.balance_after; vb = b.balance_after;
+                va = a.balance_after;
+                vb = b.balance_after;
             }
             return sortDir === 'desc' ? vb - va : va - vb;
         });
@@ -243,12 +248,14 @@ const AccountPage = observer(() => {
     const paginatedStatement = filteredStatement.slice(0, (stmtOffset + 1) * PAGE_SIZE + PAGE_SIZE);
 
     const handleSort = (field: typeof sortField) => {
-        if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-        else { setSortField(field); setSortDir('desc'); }
+        if (sortField === field) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+        else {
+            setSortField(field);
+            setSortDir('desc');
+        }
     };
 
-    const sortArrow = (field: typeof sortField) =>
-        sortField === field ? (sortDir === 'desc' ? ' ↓' : ' ↑') : '';
+    const sortArrow = (field: typeof sortField) => (sortField === field ? (sortDir === 'desc' ? ' ↓' : ' ↑') : '');
 
     const isLoggedIn = !!client?.loginid;
 
@@ -295,7 +302,9 @@ const AccountPage = observer(() => {
                     <div className='card-value card-value--positive'>
                         {formatAmount(totalDeposits, currency, isKes)}
                     </div>
-                    <div className='card-sub'>{deposits.length} deposit{deposits.length !== 1 ? 's' : ''}</div>
+                    <div className='card-sub'>
+                        {deposits.length} deposit{deposits.length !== 1 ? 's' : ''}
+                    </div>
                 </div>
                 <div className='account-page__summary-card account-page__summary-card--withdrawals'>
                     <div className='card-icon'>⬆️</div>
@@ -303,13 +312,16 @@ const AccountPage = observer(() => {
                     <div className='card-value card-value--negative'>
                         {formatAmount(totalWithdrawals, currency, isKes)}
                     </div>
-                    <div className='card-sub'>{withdrawals.length} withdrawal{withdrawals.length !== 1 ? 's' : ''}</div>
+                    <div className='card-sub'>
+                        {withdrawals.length} withdrawal{withdrawals.length !== 1 ? 's' : ''}
+                    </div>
                 </div>
                 <div className='account-page__summary-card account-page__summary-card--profit'>
                     <div className='card-icon'>📈</div>
                     <div className='card-label'>Total P&amp;L</div>
                     <div className={`card-value ${totalPnL >= 0 ? 'card-value--positive' : 'card-value--negative'}`}>
-                        {totalPnL >= 0 ? '+' : ''}{formatAmount(totalPnL, currency, isKes)}
+                        {totalPnL >= 0 ? '+' : ''}
+                        {formatAmount(totalPnL, currency, isKes)}
                     </div>
                     <div className='card-sub'>{winRate}% win rate</div>
                 </div>
@@ -317,7 +329,9 @@ const AccountPage = observer(() => {
                     <div className='card-icon'>⚡</div>
                     <div className='card-label'>Trades</div>
                     <div className='card-value'>{profitTable.length}</div>
-                    <div className='card-sub'>{wins}W / {losses}L</div>
+                    <div className='card-sub'>
+                        {wins}W / {losses}L
+                    </div>
                 </div>
             </div>
 
@@ -329,16 +343,28 @@ const AccountPage = observer(() => {
                         className={`account-tab-btn ${activeTab === tab ? 'account-tab-btn--active' : ''}`}
                         onClick={() => setActiveTab(tab)}
                     >
-                        {tab === 'pnl' ? 'P&L' :
-                         tab === 'strategies' ? 'Strategy Profitability' :
-                         tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        {tab === 'pnl'
+                            ? 'P&L'
+                            : tab === 'strategies'
+                              ? 'Strategy Profitability'
+                              : tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </button>
                 ))}
             </div>
 
             {/* Error */}
             {error && (
-                <div style={{ color: '#ef4444', fontSize: '0.82rem', marginBottom: '1rem', padding: '0.75rem 1rem', background: 'rgba(239,68,68,0.08)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <div
+                    style={{
+                        color: '#ef4444',
+                        fontSize: '0.82rem',
+                        marginBottom: '1rem',
+                        padding: '0.75rem 1rem',
+                        background: 'rgba(239,68,68,0.08)',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(239,68,68,0.2)',
+                    }}
+                >
                     ⚠️ {error}
                 </div>
             )}
@@ -376,35 +402,53 @@ const AccountPage = observer(() => {
                                         <tr>
                                             <th>ID</th>
                                             <th>Type</th>
-                                            <th className='sortable' onClick={() => handleSort('date')}>Date{sortArrow('date')}</th>
-                                            <th className='sortable' onClick={() => handleSort('amount')}>Amount{sortArrow('amount')}</th>
-                                            <th className='sortable' onClick={() => handleSort('balance_after')}>Balance After{sortArrow('balance_after')}</th>
+                                            <th className='sortable' onClick={() => handleSort('date')}>
+                                                Date{sortArrow('date')}
+                                            </th>
+                                            <th className='sortable' onClick={() => handleSort('amount')}>
+                                                Amount{sortArrow('amount')}
+                                            </th>
+                                            <th className='sortable' onClick={() => handleSort('balance_after')}>
+                                                Balance After{sortArrow('balance_after')}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {paginatedStatement.map(e => (
                                             <tr key={e.transaction_id}>
-                                                <td style={{ color: '#475569', fontSize: '0.75rem' }}>#{e.transaction_id}</td>
+                                                <td style={{ color: '#475569', fontSize: '0.75rem' }}>
+                                                    #{e.transaction_id}
+                                                </td>
                                                 <td>
                                                     <span className={`type-badge type-badge--${e.action_type}`}>
-                                                        {e.action_type === 'deposit' ? '⬇' :
-                                                         e.action_type === 'withdrawal' ? '⬆' :
-                                                         e.action_type === 'buy' ? '🟡' : '🟣'}
+                                                        {e.action_type === 'deposit'
+                                                            ? '⬇'
+                                                            : e.action_type === 'withdrawal'
+                                                              ? '⬆'
+                                                              : e.action_type === 'buy'
+                                                                ? '🟡'
+                                                                : '🟣'}
                                                         {e.action_type.charAt(0).toUpperCase() + e.action_type.slice(1)}
                                                     </span>
                                                 </td>
                                                 <td style={{ color: '#94a3b8' }}>{e.date}</td>
                                                 <td className={e.amount >= 0 ? 'amount-positive' : 'amount-negative'}>
-                                                    {e.amount >= 0 ? '+' : ''}{formatAmount(e.amount, currency, isKes)}
+                                                    {e.amount >= 0 ? '+' : ''}
+                                                    {formatAmount(e.amount, currency, isKes)}
                                                 </td>
-                                                <td className='amount-neutral'>{formatAmount(e.balance_after, currency, isKes)}</td>
+                                                <td className='amount-neutral'>
+                                                    {formatAmount(e.balance_after, currency, isKes)}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                                 {paginatedStatement.length < filteredStatement.length && (
                                     <div className='account-page__pagination'>
-                                        <button onClick={() => fetchStatement(stmtOffset + PAGE_SIZE)} disabled={loading}>
+                                        <button
+                                            onClick={() => fetchStatement(stmtOffset + PAGE_SIZE)}
+                                            disabled={loading}
+                                        >
                                             {loading ? 'Loading…' : 'Load More'}
                                         </button>
                                     </div>
@@ -423,7 +467,9 @@ const AccountPage = observer(() => {
                             <span className='toolbar-title'>Deposits ({deposits.length})</span>
                         </div>
                         {loading && deposits.length === 0 ? (
-                            <div className='account-page__loading'><div className='spin' /> Loading…</div>
+                            <div className='account-page__loading'>
+                                <div className='spin' /> Loading…
+                            </div>
                         ) : deposits.length === 0 ? (
                             <div className='account-page__empty'>
                                 <div className='empty-icon'>📥</div>
@@ -442,10 +488,16 @@ const AccountPage = observer(() => {
                                 <tbody>
                                     {deposits.map(e => (
                                         <tr key={e.transaction_id}>
-                                            <td style={{ color: '#475569', fontSize: '0.75rem' }}>#{e.transaction_id}</td>
+                                            <td style={{ color: '#475569', fontSize: '0.75rem' }}>
+                                                #{e.transaction_id}
+                                            </td>
                                             <td style={{ color: '#94a3b8' }}>{e.date}</td>
-                                            <td className='amount-positive'>+{formatAmount(Math.abs(e.amount), currency, isKes)}</td>
-                                            <td className='amount-neutral'>{formatAmount(e.balance_after, currency, isKes)}</td>
+                                            <td className='amount-positive'>
+                                                +{formatAmount(Math.abs(e.amount), currency, isKes)}
+                                            </td>
+                                            <td className='amount-neutral'>
+                                                {formatAmount(e.balance_after, currency, isKes)}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -463,7 +515,9 @@ const AccountPage = observer(() => {
                             <span className='toolbar-title'>Withdrawals ({withdrawals.length})</span>
                         </div>
                         {loading && withdrawals.length === 0 ? (
-                            <div className='account-page__loading'><div className='spin' /> Loading…</div>
+                            <div className='account-page__loading'>
+                                <div className='spin' /> Loading…
+                            </div>
                         ) : withdrawals.length === 0 ? (
                             <div className='account-page__empty'>
                                 <div className='empty-icon'>📤</div>
@@ -482,10 +536,16 @@ const AccountPage = observer(() => {
                                 <tbody>
                                     {withdrawals.map(e => (
                                         <tr key={e.transaction_id}>
-                                            <td style={{ color: '#475569', fontSize: '0.75rem' }}>#{e.transaction_id}</td>
+                                            <td style={{ color: '#475569', fontSize: '0.75rem' }}>
+                                                #{e.transaction_id}
+                                            </td>
                                             <td style={{ color: '#94a3b8' }}>{e.date}</td>
-                                            <td className='amount-negative'>-{formatAmount(Math.abs(e.amount), currency, isKes)}</td>
-                                            <td className='amount-neutral'>{formatAmount(e.balance_after, currency, isKes)}</td>
+                                            <td className='amount-negative'>
+                                                -{formatAmount(Math.abs(e.amount), currency, isKes)}
+                                            </td>
+                                            <td className='amount-neutral'>
+                                                {formatAmount(e.balance_after, currency, isKes)}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -502,13 +562,22 @@ const AccountPage = observer(() => {
                         <div className='account-page__table-toolbar'>
                             <span className='toolbar-title'>Profit &amp; Loss — {profitTable.length} Contracts</span>
                             <div className='toolbar-actions'>
-                                <span style={{ fontSize: '0.8rem', color: totalPnL >= 0 ? '#22c55e' : '#ef4444', fontWeight: 700 }}>
-                                    Net: {totalPnL >= 0 ? '+' : ''}{formatAmount(totalPnL, currency, isKes)}
+                                <span
+                                    style={{
+                                        fontSize: '0.8rem',
+                                        color: totalPnL >= 0 ? '#22c55e' : '#ef4444',
+                                        fontWeight: 700,
+                                    }}
+                                >
+                                    Net: {totalPnL >= 0 ? '+' : ''}
+                                    {formatAmount(totalPnL, currency, isKes)}
                                 </span>
                             </div>
                         </div>
                         {loading && profitTable.length === 0 ? (
-                            <div className='account-page__loading'><div className='spin' /> Loading…</div>
+                            <div className='account-page__loading'>
+                                <div className='spin' /> Loading…
+                            </div>
                         ) : profitTable.length === 0 ? (
                             <div className='account-page__empty'>
                                 <div className='empty-icon'>📊</div>
@@ -530,15 +599,26 @@ const AccountPage = observer(() => {
                                     <tbody>
                                         {profitTable.slice(0, (profitOffset + 1) * PAGE_SIZE).map(e => (
                                             <tr key={e.contract_id}>
-                                                <td style={{ color: '#475569', fontSize: '0.75rem' }}>#{e.contract_id}</td>
+                                                <td style={{ color: '#475569', fontSize: '0.75rem' }}>
+                                                    #{e.contract_id}
+                                                </td>
                                                 <td style={{ color: '#94a3b8' }}>{e.date}</td>
-                                                <td style={{ color: '#94a3b8', fontSize: '0.75rem', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <td
+                                                    style={{
+                                                        color: '#94a3b8',
+                                                        fontSize: '0.75rem',
+                                                        maxWidth: '150px',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                    }}
+                                                >
                                                     {e.shortcode?.split('_').slice(0, 2).join(' ') || '—'}
                                                 </td>
                                                 <td>{formatAmount(e.buy_price, currency, isKes)}</td>
                                                 <td>{formatAmount(e.sell_price, currency, isKes)}</td>
                                                 <td className={e.pnl >= 0 ? 'amount-positive' : 'amount-negative'}>
-                                                    {e.pnl >= 0 ? '+' : ''}{formatAmount(e.pnl, currency, isKes)}
+                                                    {e.pnl >= 0 ? '+' : ''}
+                                                    {formatAmount(e.pnl, currency, isKes)}
                                                 </td>
                                             </tr>
                                         ))}
@@ -546,7 +626,10 @@ const AccountPage = observer(() => {
                                 </table>
                                 {profitTable.length > (profitOffset + 1) * PAGE_SIZE && (
                                     <div className='account-page__pagination'>
-                                        <button onClick={() => fetchProfitTable(profitOffset + PAGE_SIZE)} disabled={loading}>
+                                        <button
+                                            onClick={() => fetchProfitTable(profitOffset + PAGE_SIZE)}
+                                            disabled={loading}
+                                        >
                                             {loading ? 'Loading…' : 'Load More'}
                                         </button>
                                     </div>
@@ -561,7 +644,9 @@ const AccountPage = observer(() => {
             {activeTab === 'strategies' && (
                 <div className='account-page__panel'>
                     {loading && profitTable.length === 0 ? (
-                        <div className='account-page__loading'><div className='spin' /> Analyzing strategies…</div>
+                        <div className='account-page__loading'>
+                            <div className='spin' /> Analyzing strategies…
+                        </div>
                     ) : strategies.length === 0 ? (
                         <div className='account-page__empty'>
                             <div className='empty-icon'>🤖</div>
@@ -584,8 +669,11 @@ const AccountPage = observer(() => {
                                         trades
                                     </div>
                                     <div className='strategy-pnl'>
-                                        <div className={`pnl-value ${s.pnl >= 0 ? 'pnl-value--positive' : 'pnl-value--negative'}`}>
-                                            {s.pnl >= 0 ? '+' : ''}{formatAmount(s.pnl, currency, isKes)}
+                                        <div
+                                            className={`pnl-value ${s.pnl >= 0 ? 'pnl-value--positive' : 'pnl-value--negative'}`}
+                                        >
+                                            {s.pnl >= 0 ? '+' : ''}
+                                            {formatAmount(s.pnl, currency, isKes)}
                                         </div>
                                         <div className='win-rate'>Net P&amp;L</div>
                                     </div>
@@ -608,15 +696,21 @@ const AccountPage = observer(() => {
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Full Name</span>
-                                <span className='setting-value'>{accountInfo.full_name || client?.account_settings?.first_name || '—'}</span>
+                                <span className='setting-value'>
+                                    {accountInfo.full_name || client?.account_settings?.first_name || '—'}
+                                </span>
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Email</span>
-                                <span className='setting-value'>{accountInfo.email || client?.account_settings?.email || '—'}</span>
+                                <span className='setting-value'>
+                                    {accountInfo.email || client?.account_settings?.email || '—'}
+                                </span>
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Country</span>
-                                <span className='setting-value'>{accountInfo.country || client?.account_settings?.country_code || '—'}</span>
+                                <span className='setting-value'>
+                                    {accountInfo.country || client?.account_settings?.country_code || '—'}
+                                </span>
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Currency</span>
@@ -631,21 +725,31 @@ const AccountPage = observer(() => {
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Win Rate</span>
-                                <span className='setting-value' style={{ color: '#22c55e' }}>{winRate}%</span>
+                                <span className='setting-value' style={{ color: '#22c55e' }}>
+                                    {winRate}%
+                                </span>
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Net P&amp;L</span>
-                                <span className='setting-value' style={{ color: totalPnL >= 0 ? '#22c55e' : '#ef4444' }}>
-                                    {totalPnL >= 0 ? '+' : ''}{formatAmount(totalPnL, currency, isKes)}
+                                <span
+                                    className='setting-value'
+                                    style={{ color: totalPnL >= 0 ? '#22c55e' : '#ef4444' }}
+                                >
+                                    {totalPnL >= 0 ? '+' : ''}
+                                    {formatAmount(totalPnL, currency, isKes)}
                                 </span>
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Total Deposits</span>
-                                <span className='setting-value' style={{ color: '#22c55e' }}>{formatAmount(totalDeposits, currency, isKes)}</span>
+                                <span className='setting-value' style={{ color: '#22c55e' }}>
+                                    {formatAmount(totalDeposits, currency, isKes)}
+                                </span>
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Total Withdrawals</span>
-                                <span className='setting-value' style={{ color: '#ef4444' }}>{formatAmount(totalWithdrawals, currency, isKes)}</span>
+                                <span className='setting-value' style={{ color: '#ef4444' }}>
+                                    {formatAmount(totalWithdrawals, currency, isKes)}
+                                </span>
                             </div>
                             <div className='account-page__settings-row'>
                                 <span className='setting-label'>Strategies Used</span>

@@ -36,10 +36,10 @@ app.post('/api/oauth/logout', (req, res) => oauthLogout(req, res));
 app.all('/api/token', (req, res) => token(req, res));
 app.all('/api/websocket/session', (req, res) => websocketSession(req, res));
 app.use('/api/derivws', (req, res, next) => {
-  if (req.path.startsWith('/')) {
-    return derivwsProxy(req, res);
-  }
-  next();
+    if (req.path.startsWith('/')) {
+        return derivwsProxy(req, res);
+    }
+    next();
 });
 
 // Proxy everything else to rsbuild dev server

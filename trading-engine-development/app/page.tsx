@@ -70,7 +70,6 @@ import { DashboardTab } from '@/components/tabs';
 import { RiskDisclaimerModal } from '@/components/modals/risk-disclaimer-modal';
 import { MarketSelector } from '@/components/market-selector';
 
-
 import { LiveChat } from '@/components/live-chat';
 import { ApiTokenModal } from '@/components/api-token-modal';
 import { useDerivAuth } from '@/hooks/use-deriv-auth';
@@ -1044,8 +1043,6 @@ export default function DerivAnalysisApp() {
                 }}
                 theme={theme}
             />
-
-
 
             {/* API Token Modal */}
             <ApiTokenModal

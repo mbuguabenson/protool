@@ -17,10 +17,10 @@ class DelegatingWebSocket {
     }
 
     setupRealSocket(ws) {
-        ws.onopen = (e) => this.trigger('open', e);
-        ws.onclose = (e) => this.trigger('close', e);
-        ws.onerror = (e) => this.trigger('error', e);
-        ws.onmessage = (e) => this.trigger('message', e);
+        ws.onopen = e => this.trigger('open', e);
+        ws.onclose = e => this.trigger('close', e);
+        ws.onerror = e => this.trigger('error', e);
+        ws.onmessage = e => this.trigger('message', e);
     }
 
     addEventListener(event, listener) {
@@ -81,7 +81,7 @@ class DelegatingWebSocket {
         return new Promise((resolve, reject) => {
             console.log(`🔌 [DelegatingWebSocket] Switching connection from ${this.url} to ${newUrl}`);
             const oldSocket = this.realSocket;
-            
+
             oldSocket.onopen = null;
             oldSocket.onclose = null;
             oldSocket.onerror = null;
@@ -98,7 +98,7 @@ class DelegatingWebSocket {
                 newSocket.removeEventListener('error', onErr);
                 resolve();
             };
-            const onErr = (e) => {
+            const onErr = e => {
                 newSocket.removeEventListener('open', onOpen);
                 newSocket.removeEventListener('error', onErr);
                 reject(e);
@@ -121,50 +121,90 @@ const DERIVWS_PUBLIC_WS = 'wss://api.derivws.com/trading/v1/options/ws/public';
  * OIDC JWTs always start with 'eyJ'. Legacy tokens are short alphanumeric strings.
  */
 const isOidcSession = () => {
-    // FASTEST CHECK: logged_state cookie — set by Deriv OAuth server upon successful login.
-    // This cookie is present before tokens are stored in localStorage, so check it FIRST.
-    // If logged_state=true, we KNOW this is an OIDC session — skip legacy WS.
-    if (typeof document !== 'undefined') {
-        const cookies = document.cookie.split(';').map(c => c.trim());
-        const loggedStateCookie = cookies.find(c => c.startsWith('logged_state='));
-        if (loggedStateCookie && loggedStateCookie.split('=')[1] === 'true') {
-            return true;
-        }
-        // Also check for Hydra session cookie patterns
-        const hasHydraSession = cookies.some(c => c.startsWith('ory_') || c.startsWith('oauth_'));
-        if (hasHydraSession) return true;
-    }
+    // 1. Gather all possible client-side tokens to check if they are OIDC JWTs (start with 'eyJ')
+    const tokens = [];
 
-    // Check main active token helper
-    const activeToken = V2GetActiveToken() || '';
-    if (activeToken.startsWith('eyJ')) return true;
+    const activeToken = V2GetActiveToken();
+    if (activeToken) tokens.push(activeToken);
 
-    // Check localStorage keys
-    const storedToken = localStorage.getItem('authToken') || '';
-    if (storedToken.startsWith('eyJ')) return true;
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) tokens.push(storedToken);
 
-    const legacyToken = localStorage.getItem('deriv_api_token') || '';
-    if (legacyToken.startsWith('eyJ')) return true;
+    const legacyToken = localStorage.getItem('deriv_api_token');
+    if (legacyToken) tokens.push(legacyToken);
 
-    // Check sessionStorage auth_info
     try {
         const authInfoStr = sessionStorage.getItem('auth_info');
         if (authInfoStr) {
             const authInfo = JSON.parse(authInfoStr);
-            if (authInfo?.access_token?.startsWith('eyJ')) return true;
+            if (authInfo?.access_token) tokens.push(authInfo.access_token);
         }
     } catch (e) {}
 
-    // Fallback: detect OIDC indicators during auth initialization/callback redirect
+    try {
+        const accountsListStr = localStorage.getItem('accountsList');
+        if (accountsListStr) {
+            const accountsList = JSON.parse(accountsListStr);
+            Object.values(accountsList).forEach(t => {
+                if (typeof t === 'string') tokens.push(t);
+            });
+        }
+    } catch (e) {}
+
+    try {
+        const clientAccountsStr = localStorage.getItem('clientAccounts');
+        if (clientAccountsStr) {
+            const clientAccounts = JSON.parse(clientAccountsStr);
+            Object.values(clientAccounts).forEach(acc => {
+                if (acc && typeof acc === 'object' && acc.token) {
+                    tokens.push(acc.token);
+                }
+            });
+        }
+    } catch (e) {}
+
+    // Filter out duplicates and empty strings
+    const uniqueTokens = Array.from(new Set(tokens.filter(t => typeof t === 'string' && t.trim() !== '')));
+
+    if (uniqueTokens.length > 0) {
+        // If we have tokens, we check if any of them is an OIDC JWT.
+        // If yes, this is OIDC. If not, this is definitely legacy.
+        return uniqueTokens.some(t => t.startsWith('eyJ'));
+    }
+
+    // 2. Fallback check for cookies and OAuth redirect indicators when no tokens are loaded yet
+    if (typeof document !== 'undefined') {
+        const cookies = document.cookie.split(';').map(c => c.trim());
+
+        // Hydra / Ory OIDC session cookies
+        const hasHydraSession = cookies.some(c => c.startsWith('ory_') || c.startsWith('oauth_'));
+        if (hasHydraSession) return true;
+
+        const loggedStateCookie = cookies.find(c => c.startsWith('logged_state='));
+        if (loggedStateCookie && loggedStateCookie.split('=')[1] === 'true') {
+            // Only classify as OIDC if we don't have any legacy indicators in the URL or local storage
+            if (typeof window !== 'undefined') {
+                const hasLegacyUrlParams =
+                    window.location.search.includes('acct1=') || window.location.hash.includes('acct1=');
+                if (!hasLegacyUrlParams) {
+                    return true;
+                }
+            }
+        }
+    }
+
     if (typeof window !== 'undefined') {
         const hasCodeVerifier = !!sessionStorage.getItem('oauth_code_verifier');
         const isCallbackPath = window.location.pathname === '/callback';
-        const hasOidcQueryParams = window.location.search.includes('code=ory_') || window.location.search.includes('scope=trade');
-        
-        if (hasCodeVerifier || isCallbackPath || hasOidcQueryParams) {
+        const hasOidcQueryParams =
+            window.location.search.includes('code=ory_') || window.location.search.includes('scope=trade');
+        const hasLegacyUrlParams = window.location.search.includes('acct1=') || window.location.hash.includes('acct1=');
+
+        if ((hasCodeVerifier || isCallbackPath || hasOidcQueryParams) && !hasLegacyUrlParams) {
             return true;
         }
     }
+
     return false;
 };
 
@@ -214,11 +254,11 @@ export const generateDerivApiInstance = (specificAppId = null) => {
     });
 
     const originalAuthorize = deriv_api.authorize.bind(deriv_api);
-    deriv_api.authorize = async (token) => {
+    deriv_api.authorize = async token => {
         if (token && token.startsWith('eyJ')) {
             const targetAccountId = localStorage.getItem('active_loginid') || '';
             console.log(`🔑 [appId.js] Intercepted authorize call for OIDC JWT. Target account: ${targetAccountId}`);
-            
+
             let accounts = [];
             try {
                 // Clear cached promise so we always get a fresh fetch on new connections
@@ -233,14 +273,22 @@ export const generateDerivApiInstance = (specificAppId = null) => {
                     accounts = stored;
                 } else {
                     // No fallback available - return a soft error that does NOT trigger InvalidToken
-                    return { authorize: null, error: { code: 'AccountsFetchFailed', message: err?.message || String(err) } };
+                    return {
+                        authorize: null,
+                        error: { code: 'AccountsFetchFailed', message: err?.message || String(err) },
+                    };
                 }
             }
 
             const targetAccount = accounts.find(a => a.account_id === targetAccountId) || accounts[0];
             if (!targetAccount) {
-                console.error('❌ [appId.js] No options accounts found. Check your Deriv account has an options trading account.');
-                return { authorize: null, error: { code: 'NoAccountsFound', message: 'No options accounts found for this token.' } };
+                console.error(
+                    '❌ [appId.js] No options accounts found. Check your Deriv account has an options trading account.'
+                );
+                return {
+                    authorize: null,
+                    error: { code: 'NoAccountsFound', message: 'No options accounts found for this token.' },
+                };
             }
 
             if (delegating_socket.connectedAccountId !== targetAccount.account_id) {
@@ -255,7 +303,10 @@ export const generateDerivApiInstance = (specificAppId = null) => {
                     // Do NOT fail authorization — let the user be logged in.
                     // The public WS connection remains active; trading calls will
                     // attempt to get a fresh OTP URL when needed.
-                    console.warn(`⚠️ [appId.js] OTP switch failed for ${targetAccount.account_id}, continuing with REST auth:`, err?.message || err);
+                    console.warn(
+                        `⚠️ [appId.js] OTP switch failed for ${targetAccount.account_id}, continuing with REST auth:`,
+                        err?.message || err
+                    );
                 }
             }
 

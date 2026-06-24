@@ -29,7 +29,11 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
 
 function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
     return (
-        <div data-slot='card-title' className={classNames('leading-none font-semibold text-center', className)} {...props} />
+        <div
+            data-slot='card-title'
+            className={classNames('leading-none font-semibold text-center', className)}
+            {...props}
+        />
     );
 }
 
@@ -59,7 +63,11 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
 
 function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
     return (
-        <div data-slot='card-footer' className={classNames('flex items-center px-6 [.border-t]:pt-6', className)} {...props} />
+        <div
+            data-slot='card-footer'
+            className={classNames('flex items-center px-6 [.border-t]:pt-6', className)}
+            {...props}
+        />
     );
 }
 

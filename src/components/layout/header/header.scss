@@ -275,7 +275,6 @@
         color: var(--text-prominent);
         animation: auth-spinner-rotate 0.8s linear infinite;
     }
-
 }
 
 .deriv-accordion--underline {
@@ -283,8 +282,12 @@
 }
 
 @keyframes auth-spinner-rotate {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ─── Hamburger button ──────────────────────────────────────── */
@@ -370,7 +373,9 @@
             color: #fff;
             box-shadow: 0 0 14px rgba(245, 158, 11, 0.5);
 
-            .header-toggle-btn__state { opacity: 0.8; }
+            .header-toggle-btn__state {
+                opacity: 0.8;
+            }
 
             &:hover {
                 box-shadow: 0 0 20px rgba(245, 158, 11, 0.65);

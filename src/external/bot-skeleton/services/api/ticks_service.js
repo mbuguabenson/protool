@@ -205,7 +205,10 @@ export default class TicksService {
                     const { id } = tick;
                     if (this.ticks.has(tick_symbol)) {
                         this.subscriptions = this.subscriptions.setIn(['tick', tick_symbol], id);
-                        this.updateTicksAndCallListeners(tick_symbol, updateTicks(this.ticks.get(tick_symbol), parseTick(tick)));
+                        this.updateTicksAndCallListeners(
+                            tick_symbol,
+                            updateTicks(this.ticks.get(tick_symbol), parseTick(tick))
+                        );
                     }
                 }
 

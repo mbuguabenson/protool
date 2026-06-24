@@ -45,19 +45,18 @@ const AuthenticatedWebSocketURL: React.FC<AuthenticatedWebSocketURLProps> = ({ a
     };
 
     return (
-        <div className="authenticated-ws-url">
-            <button
-                type="button"
-                onClick={fetchURL}
-                disabled={loading}
-                className="fetch-url-btn"
-            >
+        <div className='authenticated-ws-url'>
+            <button type='button' onClick={fetchURL} disabled={loading} className='fetch-url-btn'>
                 {loading ? 'Fetching...' : 'Get Authenticated WebSocket URL'}
             </button>
 
-            {error && <p className="error-msg" style={{ color: 'red' }}>{error}</p>}
+            {error && (
+                <p className='error-msg' style={{ color: 'red' }}>
+                    {error}
+                </p>
+            )}
             {websocketURL && (
-                <div className="url-output" style={{ marginTop: '0.5rem' }}>
+                <div className='url-output' style={{ marginTop: '0.5rem' }}>
                     <label>WebSocket URL:</label>
                     <pre style={{ overflowX: 'auto', background: '#f5f5f5', padding: '0.5rem' }}>{websocketURL}</pre>
                 </div>

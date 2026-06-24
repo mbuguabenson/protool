@@ -1,66 +1,54 @@
 import type { AuthInfo, DerivAccount, OTPResponse } from '../types';
-import {
-  storeDerivAccounts,
-  setActiveLoginId,
-  setAccountType,
-  clearAllAuthData,
-} from './storage';
+import { storeDerivAccounts, setActiveLoginId, setAccountType, clearAllAuthData } from './storage';
 import { getApiBaseUrl } from '../config/urls';
 
 /**
  * Fetch the list of trading accounts for the authenticated user.
  */
-export async function fetchAccounts(
-  authInfo: AuthInfo,
-  clientId: string
-): Promise<DerivAccount[]> {
-  const response = await fetch(`${getApiBaseUrl()}/accounts`, {
-    headers: {
-      Authorization: `Bearer ${authInfo.access_token}`,
-      'Deriv-App-ID': clientId,
-    },
-  });
+export async function fetchAccounts(authInfo: AuthInfo, clientId: string): Promise<DerivAccount[]> {
+    const response = await fetch(`${getApiBaseUrl()}/accounts`, {
+        headers: {
+            Authorization: `Bearer ${authInfo.access_token}`,
+            'Deriv-App-ID': clientId,
+        },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch accounts (${response.status})`);
-  }
+    if (!response.ok) {
+        throw new Error(`Failed to fetch accounts (${response.status})`);
+    }
 
-  const data = await response.json();
-  const accounts: DerivAccount[] = data.data;
+    const data = await response.json();
+    const accounts: DerivAccount[] = data.data;
 
-  storeDerivAccounts(accounts);
+    storeDerivAccounts(accounts);
 
-  if (accounts.length > 0) {
-    const firstAccount = accounts[0];
-    setActiveLoginId(firstAccount.account_id);
-    setAccountType(firstAccount.account_type);
-  }
+    if (accounts.length > 0) {
+        const firstAccount = accounts[0];
+        setActiveLoginId(firstAccount.account_id);
+        setAccountType(firstAccount.account_type);
+    }
 
-  return accounts;
+    return accounts;
 }
 
 /**
  * Get a one-time WebSocket URL for an authenticated session.
  */
-export async function getWebSocketOTP(
-  accountId: string,
-  authInfo: AuthInfo,
-  clientId: string
-): Promise<string> {
-  const response = await fetch(`${getApiBaseUrl()}/accounts/${accountId}/otp`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${authInfo.access_token}`,
-      'Deriv-App-ID': clientId,
-    },
-  });
+export async function getWebSocketOTP(accountId: string, authInfo: AuthInfo, clientId: string): Promise<string> {
+    const response = await fetch(`${getApiBaseUrl()}/accounts/${accountId}/otp`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${authInfo.access_token}`,
+            'Deriv-App-ID': clientId,
+        },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to get WebSocket OTP (${response.status})`);
-  }
+    if (!response.ok) {
+        throw new Error(`Failed to get WebSocket OTP (${response.status})`);
+    }
 
-  const data: OTPResponse = await response.json();
-  return data.data.url;
+    const data: OTPResponse = await response.json();
+    return data.data.url;
 }
 
 /**
@@ -68,5 +56,5 @@ export async function getWebSocketOTP(
  * Caller is responsible for closing any open WebSocket connections and resetting UI.
  */
 export function logout(): void {
-  clearAllAuthData();
+    clearAllAuthData();
 }

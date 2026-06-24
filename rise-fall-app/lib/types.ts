@@ -1,14 +1,14 @@
 export type {
-  ActiveSymbol,
-  Tick,
-  TicksHistoryResponse,
-  ContractsForResponse,
-  ContractInfo,
-  DurationLimits,
-  ProposalResponse,
-  ProposalInfo,
-  BuyResponse,
-  BuyResult,
+    ActiveSymbol,
+    Tick,
+    TicksHistoryResponse,
+    ContractsForResponse,
+    ContractInfo,
+    DurationLimits,
+    ProposalResponse,
+    ProposalInfo,
+    BuyResponse,
+    BuyResult,
 } from '@deriv/core';
 
 export type { OpenPosition } from '@/hooks/use-open-positions';

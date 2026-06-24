@@ -59,7 +59,7 @@ export default class ActiveSymbols {
             const symbol_key = symbol_obj.underlying_symbol || symbol_obj.symbol;
             // Use underlying_symbol_name if available, otherwise fall back to display_name
             const display_name_key = symbol_obj.underlying_symbol_name || symbol_obj.display_name;
-            
+
             if (
                 config().DISABLED_SYMBOLS.includes(symbol_key) ||
                 config().DISABLED_SUBMARKETS.includes(symbol_obj.submarket)

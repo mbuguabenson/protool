@@ -32,14 +32,14 @@ NEXT_PUBLIC_DERIV_OAUTH_SCOPES=trade,account_manage
 NEXT_PUBLIC_DERIV_ENV=production
 ```
 
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_DERIV_APP_ID` | Your Deriv app ID from the App Registration dashboard |
-| `NEXT_PUBLIC_DERIV_REDIRECT_URI` | OAuth redirect URI — must exactly match the URI registered in your Deriv app |
-| `NEXT_PUBLIC_DERIV_APP_NAME` | App name shown in the header |
-| `NEXT_PUBLIC_DERIV_REFERRAL_LINK` | Affiliate referral link shown to unauthenticated users (optional) |
-| `NEXT_PUBLIC_DERIV_OAUTH_SCOPES` | Comma-separated OAuth scopes (e.g. `trade,account_manage`) |
-| `NEXT_PUBLIC_DERIV_ENV` | `production` to connect to the live Deriv endpoint; `preview` for staging |
+| Variable                          | Description                                                                  |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_DERIV_APP_ID`        | Your Deriv app ID from the App Registration dashboard                        |
+| `NEXT_PUBLIC_DERIV_REDIRECT_URI`  | OAuth redirect URI — must exactly match the URI registered in your Deriv app |
+| `NEXT_PUBLIC_DERIV_APP_NAME`      | App name shown in the header                                                 |
+| `NEXT_PUBLIC_DERIV_REFERRAL_LINK` | Affiliate referral link shown to unauthenticated users (optional)            |
+| `NEXT_PUBLIC_DERIV_OAUTH_SCOPES`  | Comma-separated OAuth scopes (e.g. `trade,account_manage`)                   |
+| `NEXT_PUBLIC_DERIV_ENV`           | `production` to connect to the live Deriv endpoint; `preview` for staging    |
 
 For local development, copy `.env.production` to `.env.local` — Next.js will load `.env.local` automatically and it takes precedence over `.env.production`.
 

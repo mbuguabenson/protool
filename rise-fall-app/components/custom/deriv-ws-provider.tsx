@@ -7,10 +7,10 @@ import type { DerivWS } from '@deriv/core';
 import type { UseAuthReturn } from '@/hooks/use-auth';
 
 interface DerivWSContextValue {
-  ws: DerivWS | null;
-  isConnected: boolean;
-  isExhausted: boolean;
-  auth: UseAuthReturn;
+    ws: DerivWS | null;
+    isConnected: boolean;
+    isExhausted: boolean;
+    auth: UseAuthReturn;
 }
 
 const DerivWSContext = createContext<DerivWSContextValue | null>(null);
@@ -21,23 +21,19 @@ const DerivWSContext = createContext<DerivWSContextValue | null>(null);
  * and recreate the connection.
  */
 export function DerivWSProvider({ children }: { children: React.ReactNode }) {
-  const auth = useAuth();
-  const { ws, isConnected, isExhausted } = useDerivWS({
-    url: auth.wsUrl,
-    accountId: auth.activeAccountId ?? undefined,
-  });
+    const auth = useAuth();
+    const { ws, isConnected, isExhausted } = useDerivWS({
+        url: auth.wsUrl,
+        accountId: auth.activeAccountId ?? undefined,
+    });
 
-  return (
-    <DerivWSContext.Provider value={{ ws, isConnected, isExhausted, auth }}>
-      {children}
-    </DerivWSContext.Provider>
-  );
+    return <DerivWSContext.Provider value={{ ws, isConnected, isExhausted, auth }}>{children}</DerivWSContext.Provider>;
 }
 
 export function useDerivWSContext(): DerivWSContextValue {
-  const ctx = useContext(DerivWSContext);
-  if (!ctx) {
-    throw new Error('useDerivWSContext must be used within a DerivWSProvider');
-  }
-  return ctx;
+    const ctx = useContext(DerivWSContext);
+    if (!ctx) {
+        throw new Error('useDerivWSContext must be used within a DerivWSProvider');
+    }
+    return ctx;
 }

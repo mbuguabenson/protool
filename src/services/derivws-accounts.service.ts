@@ -146,7 +146,8 @@ export class DerivWSAccountsService {
 
             const tryFetch = async (endpoint: string): Promise<string> => {
                 const response = await fetch(endpoint, { method: 'POST', headers });
-                if (!response.ok) throw new Error(`[DerivWS] OTP ${response.status} ${response.statusText} from ${endpoint}`);
+                if (!response.ok)
+                    throw new Error(`[DerivWS] OTP ${response.status} ${response.statusText} from ${endpoint}`);
                 const otpResponse: OTPResponse = await response.json();
                 const websocketURL = otpResponse.data.url;
                 if (!websocketURL) throw new Error('WebSocket URL not found in OTP response');

@@ -33,7 +33,7 @@ export const loginUrl = async ({ language }: TLoginUrl) => {
     const signup_device = signup_device_cookie.get('signup_device');
     const date_first_contact_cookie = new (CookieStorage as any)('date_first_contact');
     const date_first_contact = date_first_contact_cookie.get('date_first_contact');
-    
+
     const oauthUrlStr = await generateOAuthURL();
     const oauth_url = new URL(oauthUrlStr);
 

@@ -94,7 +94,7 @@ const AppLoader: React.FC<AppLoaderProps> = ({ onLoadingComplete }) => {
         <div className='georgetown-loader'>
             {/* ── TradingView Chart Background ── */}
             <div className='tv-chart-bg'>
-                <img src="/assets/tv_chart_bg.png" alt="Trading View Background" className="tv-chart-bg__image" />
+                <img src='/assets/tv_chart_bg.png' alt='Trading View Background' className='tv-chart-bg__image' />
                 <div className='tv-chart-bg__blur-overlay' />
                 <div className='tv-chart-bg__scanline' />
             </div>

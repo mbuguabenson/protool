@@ -33,7 +33,6 @@ const useActiveAccount = ({ allBalanceData }: { allBalanceData: Balance | null }
     const balanceLookupLoginId = showAsCR || activeAccount?.loginid;
     const currentBalanceData = allBalanceData?.accounts?.[balanceLookupLoginId ?? ''];
 
-
     const modifiedAccount = useMemo(() => {
         if (!activeAccount) return undefined;
 

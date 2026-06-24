@@ -1,14 +1,14 @@
 import {
-  Inter,
-  Roboto,
-  Poppins,
-  DM_Sans,
-  Lato,
-  Nunito,
-  Open_Sans,
-  Montserrat,
-  Raleway,
-  Source_Sans_3,
+    Inter,
+    Roboto,
+    Poppins,
+    DM_Sans,
+    Lato,
+    Nunito,
+    Open_Sans,
+    Montserrat,
+    Raleway,
+    Source_Sans_3,
 } from 'next/font/google';
 
 /**
@@ -28,14 +28,14 @@ export const inter = Inter({ subsets: ['latin'] });
 
 // All supported app-builder fonts, pre-loaded at build time via next/font.
 // Variable fonts don't require an explicit weight; non-variable ones do.
-const roboto     = Roboto(      { subsets: ['latin'] });
-const poppins    = Poppins(     { subsets: ['latin'], weight: ['400', '500', '600', '700'] });
-const dmSans     = DM_Sans(     { subsets: ['latin'] });
-const lato       = Lato(        { subsets: ['latin'], weight: ['400', '700'] });
-const nunito     = Nunito(      { subsets: ['latin'] });
-const openSans   = Open_Sans(   { subsets: ['latin'] });
-const montserrat = Montserrat(  { subsets: ['latin'] });
-const raleway    = Raleway(     { subsets: ['latin'] });
+const roboto = Roboto({ subsets: ['latin'] });
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600', '700'] });
+const dmSans = DM_Sans({ subsets: ['latin'] });
+const lato = Lato({ subsets: ['latin'], weight: ['400', '700'] });
+const nunito = Nunito({ subsets: ['latin'] });
+const openSans = Open_Sans({ subsets: ['latin'] });
+const montserrat = Montserrat({ subsets: ['latin'] });
+const raleway = Raleway({ subsets: ['latin'] });
 const sourceSans3 = Source_Sans_3({ subsets: ['latin'] });
 
 /**
@@ -44,14 +44,14 @@ const sourceSans3 = Source_Sans_3({ subsets: ['latin'] });
  * font-family is inherited by all children via normal CSS inheritance.
  */
 export const FONT_CLASS_MAP: Record<string, string> = {
-  Inter:           inter.className,
-  Roboto:          roboto.className,
-  Poppins:         poppins.className,
-  'DM Sans':       dmSans.className,
-  Lato:            lato.className,
-  Nunito:          nunito.className,
-  'Open Sans':     openSans.className,
-  Montserrat:      montserrat.className,
-  Raleway:         raleway.className,
-  'Source Sans 3': sourceSans3.className,
+    Inter: inter.className,
+    Roboto: roboto.className,
+    Poppins: poppins.className,
+    'DM Sans': dmSans.className,
+    Lato: lato.className,
+    Nunito: nunito.className,
+    'Open Sans': openSans.className,
+    Montserrat: montserrat.className,
+    Raleway: raleway.className,
+    'Source Sans 3': sourceSans3.className,
 };

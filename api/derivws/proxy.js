@@ -42,15 +42,20 @@ export default async function handler(req, res) {
 
         // Sanity check: if subpath is empty or looks like the proxy file itself, reject
         if (!subpath || subpath === 'proxy.js' || subpath === 'proxy') {
-            console.error('[DerivWS Proxy] Could not extract valid subpath from URL:', req.url, '| originalPath:', originalPath);
+            console.error(
+                '[DerivWS Proxy] Could not extract valid subpath from URL:',
+                req.url,
+                '| originalPath:',
+                originalPath
+            );
             return res.status(400).json({
                 error: 'invalid_proxy_path',
                 error_description: `Could not determine target API path. Raw URL: ${req.url}`,
             });
         }
-        
+
         const targetUrl = `https://api.derivws.com/${subpath}`;
-        
+
         const authHeader = req.headers.authorization;
         const appIdHeader = req.headers['deriv-app-id'] || req.headers['Deriv-App-ID'] || req.headers['deriv-app-id'];
 
@@ -71,7 +76,7 @@ export default async function handler(req, res) {
         }
 
         const derivResponse = await fetch(targetUrl, fetchOptions);
-        
+
         let responseData;
         const contentType = derivResponse.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
@@ -111,7 +116,11 @@ export default async function handler(req, res) {
                         }
                     } else {
                         const createErrData = await createResponse.json().catch(() => ({}));
-                        console.error('[Proxy] Failed to auto-create demo options account:', createResponse.status, createErrData);
+                        console.error(
+                            '[Proxy] Failed to auto-create demo options account:',
+                            createResponse.status,
+                            createErrData
+                        );
                     }
                 } catch (e) {
                     console.error('[Proxy] Error auto-creating options account:', e);

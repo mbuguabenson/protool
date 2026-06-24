@@ -97,7 +97,11 @@ const FloatingSignalScanner: React.FC = observer(() => {
                 <div
                     ref={panelRef}
                     className='floating-scanner__panel'
-                    style={isDesktop ? { left: `${position.x}px`, top: `${position.y}px`, width: '600px', height: 'auto' } : {}}
+                    style={
+                        isDesktop
+                            ? { left: `${position.x}px`, top: `${position.y}px`, width: '600px', height: 'auto' }
+                            : {}
+                    }
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}

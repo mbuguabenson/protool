@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AIFloatingScannerEngine, type StrategySignal, type ConsensuSignal, type TickData } from '@/lib/ai-floating-scanner';
+import {
+    AIFloatingScannerEngine,
+    type StrategySignal,
+    type ConsensuSignal,
+    type TickData,
+} from '@/lib/ai-floating-scanner';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -15,7 +20,7 @@ const AiScannerCard: React.FC = () => {
         const interval = setInterval(() => {
             const newTick = { digit: Math.floor(Math.random() * 10), timestamp: Date.now() };
             tickCountRef.current++;
-            
+
             setTicks(prev => [...prev, newTick].slice(-100)); // Keep last 100 ticks
             setLastDigit(newTick.digit);
         }, 1000);
@@ -32,34 +37,31 @@ const AiScannerCard: React.FC = () => {
     }, [ticks]);
 
     const renderStrategyCard = (strategy: StrategySignal, index: number) => {
+        const signalBadgeColor =
+            strategy.signal === 'BUY'
+                ? 'bg-green-500 text-white'
+                : strategy.signal === 'SELL'
+                  ? 'bg-red-500 text-white'
+                  : 'bg-gray-300 text-gray-800';
 
-        const signalBadgeColor = strategy.signal === 'BUY' ? 'bg-green-500 text-white' 
-                                : strategy.signal === 'SELL' ? 'bg-red-500 text-white' 
-                                : 'bg-gray-300 text-gray-800';
-
-        const strengthColor = strategy.strength === 'ELITE' ? 'bg-purple-500' 
-                             : strategy.strength === 'STRONG' ? 'bg-blue-500' 
-                             : 'bg-gray-400';
+        const strengthColor =
+            strategy.strength === 'ELITE'
+                ? 'bg-purple-500'
+                : strategy.strength === 'STRONG'
+                  ? 'bg-blue-500'
+                  : 'bg-gray-400';
 
         return (
             <Card key={index} className='w-full mb-4'>
                 <CardHeader>
                     <div className='flex justify-between items-center'>
-                        <CardTitle className='text-lg'>
-                            {strategy.strategy.replace(/_/g, ' ')}
-                        </CardTitle>
+                        <CardTitle className='text-lg'>{strategy.strategy.replace(/_/g, ' ')}</CardTitle>
                         <div className='flex gap-2'>
-                            <Badge className={signalBadgeColor}>
-                                {strategy.signal}
-                            </Badge>
-                            <Badge className={strengthColor}>
-                                {strategy.strength}
-                            </Badge>
+                            <Badge className={signalBadgeColor}>{strategy.signal}</Badge>
+                            <Badge className={strengthColor}>{strategy.strength}</Badge>
                         </div>
                     </div>
-                    <CardDescription>
-                        Confidence: {Math.round(strategy.confidence)}%
-                    </CardDescription>
+                    <CardDescription>Confidence: {Math.round(strategy.confidence)}%</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className='space-y-3'>
@@ -71,17 +73,11 @@ const AiScannerCard: React.FC = () => {
                         )}
                         <div>
                             <div className='text-sm text-gray-600 mb-1'>Market Dominance</div>
-                            <div className='text-lg font-bold'>
-                                {Math.round(strategy.dominance)}%
-                            </div>
+                            <div className='text-lg font-bold'>{Math.round(strategy.dominance)}%</div>
                         </div>
-                        <div className='text-sm text-gray-700'>
-                            {strategy.reasoning}
-                        </div>
+                        <div className='text-sm text-gray-700'>{strategy.reasoning}</div>
                         {strategy.skipTicks > 0 && (
-                            <div className='text-sm text-yellow-600'>
-                                ⏸️ Skip next {strategy.skipTicks} ticks
-                            </div>
+                            <div className='text-sm text-yellow-600'>⏸️ Skip next {strategy.skipTicks} ticks</div>
                         )}
                     </div>
                 </CardContent>
@@ -107,45 +103,32 @@ const AiScannerCard: React.FC = () => {
                     {consensus && (
                         <Card className='lg:col-span-3'>
                             <CardHeader>
-                                <CardTitle className='text-xl'>
-                                    📊 Market Consensus
-                                </CardTitle>
+                                <CardTitle className='text-xl'>📊 Market Consensus</CardTitle>
                                 <CardDescription>
-                                    {consensus.supportingStrategies} out of {consensus.allStrategies.length} strategies agree
+                                    {consensus.supportingStrategies} out of {consensus.allStrategies.length} strategies
+                                    agree
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className='flex items-center justify-between'>
                                 <div className='text-center'>
-                                    <div className='text-4xl font-bold'>
-                                        {consensus.overallSignal}
-                                    </div>
-                                    <div className='text-lg text-gray-600'>
-                                        Overall Signal
-                                    </div>
+                                    <div className='text-4xl font-bold'>{consensus.overallSignal}</div>
+                                    <div className='text-lg text-gray-600'>Overall Signal</div>
                                 </div>
                                 <div className='text-center'>
                                     <div className='text-3xl font-bold text-blue-600'>
                                         {Math.round(consensus.confidence)}%
                                     </div>
-                                    <div className='text-sm text-gray-600'>
-                                        Confidence
-                                    </div>
+                                    <div className='text-sm text-gray-600'>Confidence</div>
                                 </div>
                                 <div className='text-center'>
-                                    <div className='text-2xl font-bold'>
-                                        {consensus.marketHeat}
-                                    </div>
-                                    <div className='text-sm text-gray-600'>
-                                        Market Heat
-                                    </div>
+                                    <div className='text-2xl font-bold'>{consensus.marketHeat}</div>
+                                    <div className='text-sm text-gray-600'>Market Heat</div>
                                 </div>
                                 <div className='text-center'>
                                     <div className='text-lg font-semibold text-purple-600'>
                                         {consensus.dominantStrategy.replace(/_/g, ' ')}
                                     </div>
-                                    <div className='text-sm text-gray-600'>
-                                        Dominant Strategy
-                                    </div>
+                                    <div className='text-sm text-gray-600'>Dominant Strategy</div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -157,9 +140,7 @@ const AiScannerCard: React.FC = () => {
                             <CardTitle>Last Digit</CardTitle>
                         </CardHeader>
                         <CardContent className='text-center'>
-                            <div className='text-6xl font-bold text-primary'>
-                                {lastDigit ?? '-'}
-                            </div>
+                            <div className='text-6xl font-bold text-primary'>{lastDigit ?? '-'}</div>
                         </CardContent>
                     </Card>
 

@@ -116,9 +116,7 @@ export const AccountSwitcherWalletItem = observer(
                     </Text>
                 </div>
                 {show_badge && <WalletBadge is_demo={Boolean(is_virtual)} label={landing_company_name} />}
-                {is_dtrade_active && (
-                    <span className='acc-switcher-wallet-item__badge'>Active</span>
-                )}
+                {is_dtrade_active && <span className='acc-switcher-wallet-item__badge'>Active</span>}
             </div>
         );
     }

@@ -22,13 +22,20 @@ export default async function handler(req, res) {
         const access_token = cookies.deriv_access_token;
         const app_id = cookies.deriv_app_id || process.env.DERIV_LEGACY_APP_ID;
         const stored_selected_loginid = cookies.deriv_selected_loginid;
-        
+
         // Alphanumeric client ID required for REST calls to https://api.derivws.com
         const oauth_client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
         // Numeric legacy app ID required for frontend/bot-skeleton websocket connection parameter
         const legacy_app_id = app_id || process.env.DERIV_LEGACY_APP_ID || '113555';
 
-        console.log('[Session] Restoring session. Token present:', !!access_token, 'Legacy App ID:', legacy_app_id, 'OAuth Client ID:', oauth_client_id);
+        console.log(
+            '[Session] Restoring session. Token present:',
+            !!access_token,
+            'Legacy App ID:',
+            legacy_app_id,
+            'OAuth Client ID:',
+            oauth_client_id
+        );
 
         if (!access_token) {
             console.log('[Session] No access token found in cookies. Returning logged_in: false');
@@ -64,13 +71,19 @@ export default async function handler(req, res) {
                                 res.setHeader('Set-Cookie', [
                                     `deriv_access_token=${encodeURIComponent(newTokenData.access_token)}; ${cookieOpts.join('; ')}; Max-Age=${maxAge}`,
                                     `deriv_token_expires=${Date.now() + maxAge * 1000}; ${cookieOpts.join('; ')}`,
-                                    ...(newTokenData.refresh_token ? [`deriv_refresh_token=${encodeURIComponent(newTokenData.refresh_token)}; ${cookieOpts.join('; ')}; Max-Age=604800`] : []),
+                                    ...(newTokenData.refresh_token
+                                        ? [
+                                              `deriv_refresh_token=${encodeURIComponent(newTokenData.refresh_token)}; ${cookieOpts.join('; ')}; Max-Age=604800`,
+                                          ]
+                                        : []),
                                 ]);
                                 // Use the new access token for this request
                                 cookies.deriv_access_token = newTokenData.access_token;
                                 console.log('[Session] Token refreshed successfully.');
                             } else {
-                                console.warn('[Session] Token refresh response missing access_token. Returning logged_in: false.');
+                                console.warn(
+                                    '[Session] Token refresh response missing access_token. Returning logged_in: false.'
+                                );
                                 return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
                             }
                         } else {
@@ -104,7 +117,11 @@ export default async function handler(req, res) {
                 headers: account_headers,
             });
 
-            console.log('[Session] Options accounts response status:', tradingResponse.status, tradingResponse.statusText);
+            console.log(
+                '[Session] Options accounts response status:',
+                tradingResponse.status,
+                tradingResponse.statusText
+            );
 
             if (tradingResponse.ok) {
                 const tradingData = await tradingResponse.json();
@@ -144,7 +161,8 @@ export default async function handler(req, res) {
                     });
                     if (refetchResponse.ok) {
                         const refetchData = await refetchResponse.json();
-                        const refetchAccounts = refetchData.data || refetchData.accounts || refetchData.trading_accounts || [];
+                        const refetchAccounts =
+                            refetchData.data || refetchData.accounts || refetchData.trading_accounts || [];
                         accounts = refetchAccounts
                             .map(account => ({
                                 loginid: account.account_id || account.loginid || account.login_id || '',
@@ -158,7 +176,11 @@ export default async function handler(req, res) {
                     }
                 } else {
                     const createErrData = await createResponse.json().catch(() => ({}));
-                    console.error('[Session] Failed to auto-create demo options account:', createResponse.status, createErrData);
+                    console.error(
+                        '[Session] Failed to auto-create demo options account:',
+                        createResponse.status,
+                        createErrData
+                    );
                 }
             }
         } catch (err) {
@@ -170,7 +192,12 @@ export default async function handler(req, res) {
         let selectedLoginId = stored_selected_loginid || accounts[0]?.loginid || null;
         const selectedAccount = accounts.find(account => account.loginid === selectedLoginId) || accounts[0] || null;
 
-        console.log('[Session] Session recovery complete. Selected account ID:', selectedAccount?.loginid || selectedLoginId, 'Account count:', accounts.length);
+        console.log(
+            '[Session] Session recovery complete. Selected account ID:',
+            selectedAccount?.loginid || selectedLoginId,
+            'Account count:',
+            accounts.length
+        );
 
         return res.status(200).json({
             logged_in: true,

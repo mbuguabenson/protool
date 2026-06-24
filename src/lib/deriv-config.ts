@@ -1,5 +1,5 @@
-import brandConfig from "@/components/shared/brand.config.json";
-import { getAppId, getConfiguredClientId, getAuthRedirectUri } from "@/components/shared/utils/config/config";
+import brandConfig from '@/components/shared/brand.config.json';
+import { getAppId, getConfiguredClientId, getAuthRedirectUri } from '@/components/shared/utils/config/config';
 
 /**
  * Deriv API Configuration
@@ -19,45 +19,49 @@ import { getAppId, getConfiguredClientId, getAuthRedirectUri } from "@/component
 
 // Get values lazily to avoid SSR issues
 const getDerivAppId = () => {
-  if (typeof window !== 'undefined') {
-    return getAppId().toString();
-  }
-  return process.env.NEXT_PUBLIC_DERIV_APP_ID || 
-         process.env.REACT_APP_DERIV_APP_ID || 
-         process.env.DERIV_APP_ID || 
-         brandConfig.oauth.app_id || 
-         '113555'; // Use '113555' as default
+    if (typeof window !== 'undefined') {
+        return getAppId().toString();
+    }
+    return (
+        process.env.NEXT_PUBLIC_DERIV_APP_ID ||
+        process.env.REACT_APP_DERIV_APP_ID ||
+        process.env.DERIV_APP_ID ||
+        brandConfig.oauth.app_id ||
+        '113555'
+    ); // Use '113555' as default
 };
 
 const getDerivLegacyAppId = () => {
-  return getDerivAppId(); // Legacy app ID is same as main app ID
+    return getDerivAppId(); // Legacy app ID is same as main app ID
 };
 
 const getOAuthClientId = () => {
-  if (typeof window !== 'undefined') {
-    return getConfiguredClientId();
-  }
-  return process.env.NEXT_PUBLIC_DERIV_OAUTH_CLIENT_ID || 
-         process.env.REACT_APP_DERIV_OAUTH_CLIENT_ID || 
-         process.env.DERIV_OAUTH_CLIENT_ID || 
-         process.env.CLIENT_ID || 
-         brandConfig.oauth.client_id || 
-         '33yStbGyLdNdqAyCuDk1d';
+    if (typeof window !== 'undefined') {
+        return getConfiguredClientId();
+    }
+    return (
+        process.env.NEXT_PUBLIC_DERIV_OAUTH_CLIENT_ID ||
+        process.env.REACT_APP_DERIV_OAUTH_CLIENT_ID ||
+        process.env.DERIV_OAUTH_CLIENT_ID ||
+        process.env.CLIENT_ID ||
+        brandConfig.oauth.client_id ||
+        '33yStbGyLdNdqAyCuDk1d'
+    );
 };
 
 const getOAuthRedirectUrl = () => {
-  if (typeof window !== 'undefined') {
-    return getAuthRedirectUri();
-  }
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
-  const brandRedirectUrl = brandConfig.oauth.redirect_uri;
-  const productionUrl = brandRedirectUrl || 'https://protooldbot.vercel.app';
+    if (typeof window !== 'undefined') {
+        return getAuthRedirectUri();
+    }
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+    const brandRedirectUrl = brandConfig.oauth.redirect_uri;
+    const productionUrl = brandRedirectUrl || 'https://protooldbot.vercel.app';
 
-  if (isProduction) {
-    return productionUrl;
-  }
-  
-  return 'http://localhost:3001';
+    if (isProduction) {
+        return productionUrl;
+    }
+
+    return 'http://localhost:3001';
 };
 
 export const DERIV_APP_ID = getDerivAppId();
@@ -90,9 +94,9 @@ export const DERIV_API = {
     REST_BASE: 'https://api.derivws.com',
     // Options WS structure (kept for compatibility - no app_id)
     OPTIONS_WS: {
-      DEMO: 'wss://api.derivws.com/trading/v1/options/ws/demo',
-      REAL: 'wss://api.derivws.com/trading/v1/options/ws/real',
-      PUBLIC: 'wss://api.derivws.com/trading/v1/options/ws/public',
+        DEMO: 'wss://api.derivws.com/trading/v1/options/ws/demo',
+        REAL: 'wss://api.derivws.com/trading/v1/options/ws/real',
+        PUBLIC: 'wss://api.derivws.com/trading/v1/options/ws/public',
     },
 } as const;
 

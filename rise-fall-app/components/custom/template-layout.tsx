@@ -26,13 +26,13 @@ import { EnvCheck } from './env-check';
  * - Toaster sits outside ViewportScaler so toasts are never CSS-transformed.
  */
 export function TemplateLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <Providers>
-      <DerivWSProvider>
-        <ViewportScaler>{children}</ViewportScaler>
-      </DerivWSProvider>
-      <Toaster />
-      <EnvCheck />
-    </Providers>
-  );
+    return (
+        <Providers>
+            <DerivWSProvider>
+                <ViewportScaler>{children}</ViewportScaler>
+            </DerivWSProvider>
+            <Toaster />
+            <EnvCheck />
+        </Providers>
+    );
 }
