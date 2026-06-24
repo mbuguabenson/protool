@@ -398,13 +398,28 @@ export const V2GetActiveToken = () => {
     // Prefer token from centralized OAuthTokenExchangeService
     try {
         const oauthToken = OAuthTokenExchangeService.getAccessToken();
-        if (oauthToken) return oauthToken;
+        if (oauthToken) {
+            console.log('[V2GetActiveToken] Using OAuthTokenExchangeService token.',
+                oauthToken.startsWith('eyJ') ? 'OIDC JWT' : 'legacy token');
+            return oauthToken;
+        }
     } catch (e) {
         // Ignore and fallback
     }
 
-    const token = localStorage.getItem('authToken');
-    if (token && token !== 'null') return token;
+    const authToken = localStorage.getItem('authToken');
+    if (authToken && authToken !== 'null') {
+        console.log('[V2GetActiveToken] Using localStorage authToken.',
+            authToken.startsWith('eyJ') ? 'OIDC JWT' : 'legacy token');
+        return authToken;
+    }
+
+    const legacyToken = localStorage.getItem('deriv_api_token');
+    if (legacyToken && legacyToken !== 'null') {
+        console.log('[V2GetActiveToken] Using legacy deriv_api_token from localStorage.');
+        return legacyToken;
+    }
+
     return null;
 };
 

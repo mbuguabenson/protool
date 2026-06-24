@@ -80,7 +80,7 @@ export class DerivWSAccountsService {
     static async fetchAccountsList(accessToken: string): Promise<DerivAccount[]> {
         if (this.accountsFetchPromise) return this.accountsFetchPromise;
 
-        this.accountsFetchPromise = (async () => {
+        const fetchPromise = (async () => {
             const OptionsDir = (brandConfig as any).platform?.derivws?.directories?.options || '';
             const headers: Record<string, string> = {
                 Authorization: `Bearer ${accessToken}`,
@@ -93,6 +93,7 @@ export class DerivWSAccountsService {
             const proxyEndpoint = `${this.getProxyBaseURL()}${OptionsDir}accounts`;
 
             const tryFetch = async (endpoint: string): Promise<DerivAccount[]> => {
+                console.log('[DerivWS] fetchAccountsList trying endpoint:', endpoint);
                 const response = await fetch(endpoint, { method: 'GET', headers });
                 if (!response.ok) {
                     throw new Error(`[DerivWS] ${response.status} ${response.statusText} from ${endpoint}`);
@@ -103,28 +104,31 @@ export class DerivWSAccountsService {
                 return accounts;
             };
 
-            try {
-                // Try direct API (no proxy hop)
-                const accounts = await tryFetch(directEndpoint);
-                this.storeAccounts(accounts);
-                return accounts;
-            } catch (directErr) {
-                console.warn('[DerivWS] Direct API call failed, trying proxy:', directErr);
+            const useProxyFirst = typeof window !== 'undefined';
+            const endpointOrder = useProxyFirst ? [proxyEndpoint, directEndpoint] : [directEndpoint, proxyEndpoint];
+            console.log('[DerivWS] fetchAccountsList token prefix:', accessToken?.slice(0, 8), 'useProxyFirst:', useProxyFirst);
+
+            for (const endpoint of endpointOrder) {
                 try {
-                    const accounts = await tryFetch(proxyEndpoint);
+                    const accounts = await tryFetch(endpoint);
                     this.storeAccounts(accounts);
                     return accounts;
-                } catch (proxyErr) {
-                    console.error('[DerivWS] Error fetching accounts (both direct and proxy failed):', proxyErr);
-                    this.accountsFetchPromise = null;
-                    throw proxyErr;
+                } catch (err) {
+                    console.warn('[DerivWS] fetchAccountsList failed for endpoint:', endpoint, err);
                 }
-            } finally {
-                setTimeout(() => {
-                    this.accountsFetchPromise = null;
-                }, 100);
             }
+
+            const finalError = new Error('[DerivWS] Error fetching accounts from both direct API and proxy.');
+            console.error(finalError);
+            throw finalError;
         })();
+
+        this.accountsFetchPromise = fetchPromise;
+        fetchPromise.finally(() => {
+            setTimeout(() => {
+                this.accountsFetchPromise = null;
+            }, 100);
+        });
 
         return this.accountsFetchPromise;
     }
@@ -145,6 +149,7 @@ export class DerivWSAccountsService {
             const proxyEndpoint = `${this.getProxyBaseURL()}${optionsDir}accounts/${accountId}/otp`;
 
             const tryFetch = async (endpoint: string): Promise<string> => {
+                console.log('[DerivWS] fetchOTPWebSocketURL trying endpoint:', endpoint);
                 const response = await fetch(endpoint, { method: 'POST', headers });
                 if (!response.ok)
                     throw new Error(`[DerivWS] OTP ${response.status} ${response.statusText} from ${endpoint}`);
@@ -154,22 +159,22 @@ export class DerivWSAccountsService {
                 return websocketURL;
             };
 
-            try {
-                return await tryFetch(directEndpoint);
-            } catch (directErr) {
-                console.warn('[DerivWS] Direct OTP call failed, trying proxy:', directErr);
+            const useProxyFirst = typeof window !== 'undefined';
+            const endpointOrder = useProxyFirst ? [proxyEndpoint, directEndpoint] : [directEndpoint, proxyEndpoint];
+            console.log('[DerivWS] fetchOTPWebSocketURL useProxyFirst:', useProxyFirst);
+
+            for (const endpoint of endpointOrder) {
                 try {
-                    return await tryFetch(proxyEndpoint);
-                } catch (proxyErr) {
-                    console.error('[DerivWS] Error fetching OTP (both direct and proxy failed):', proxyErr);
-                    this.otpFetchPromises.delete(cacheKey);
-                    throw proxyErr;
+                    return await tryFetch(endpoint);
+                } catch (err) {
+                    console.warn('[DerivWS] fetchOTPWebSocketURL failed for endpoint:', endpoint, err);
                 }
-            } finally {
-                setTimeout(() => {
-                    this.otpFetchPromises.delete(cacheKey);
-                }, 100);
             }
+
+            const finalError = new Error('[DerivWS] Error fetching OTP from both direct API and proxy.');
+            console.error(finalError);
+            this.otpFetchPromises.delete(cacheKey);
+            throw finalError;
         })();
 
         this.otpFetchPromises.set(cacheKey, otpPromise);
