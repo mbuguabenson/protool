@@ -7,6 +7,7 @@ import { observer as globalObserver } from '@/external/bot-skeleton/utils/observ
 import { clearAuthData } from '@/utils/auth-utils';
 import { OAuthTokenExchangeService } from '@/services/oauth-token-exchange.service';
 import { DerivWSAccountsService } from '@/services/derivws-accounts.service';
+import { setOAuthFlowType } from '@/lib/deriv-api-v1/deriv-auth-compat';
 import { localize } from '@deriv-com/translations';
 import { URLUtils } from '@deriv-com/utils';
 import App from './App';
@@ -116,9 +117,10 @@ const restoreLoginFromServerSession = async () => {
             sessionStorage.setItem('query_param_currency', sessionData.currency);
         }
 
-        // Store auth_info centrally for client-side services
+        // Mark this as a modern OAuth session when we have an auth_info access token
         try {
             if (sessionData.access_token) {
+                setOAuthFlowType('modern');
                 OAuthTokenExchangeService.setAuthInfo({
                     access_token: sessionData.access_token,
                     token_type: sessionData.token_type || 'bearer',
