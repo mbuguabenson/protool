@@ -59,6 +59,7 @@ const Dialog = ({
     } = other_props;
 
     const wrapper_ref = React.useRef() as React.MutableRefObject<HTMLInputElement>;
+    const nodeRef = React.useRef(null);
 
     React.useEffect(() => {
         if (is_visible && !!disableApp) {
@@ -121,6 +122,7 @@ const Dialog = ({
             appear
             in={is_visible && !is_loading}
             timeout={50}
+            nodeRef={nodeRef}
             classNames={{
                 appear: 'dc-dialog__wrapper--enter',
                 enter: 'dc-dialog__wrapper--enter',
@@ -130,6 +132,7 @@ const Dialog = ({
             unmountOnExit
         >
             <div
+                ref={nodeRef}
                 className={classNames('dc-dialog__wrapper', className, {
                     'dc-dialog__wrapper--has-portal': !!portal_element_id,
                 })}

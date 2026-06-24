@@ -75,7 +75,13 @@ const router = createBrowserRouter(
             <Route path='callback' element={<AppRoot />} />
             <Route path='*' element={<Navigate to='/' replace />} />
         </Route>
-    )
+    ),
+    {
+        future: {
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+        },
+    }
 );
 
 // Global copy trading manager instance - persists across tab changes
@@ -336,7 +342,7 @@ function App() {
         <>
             <SecurityProtection />
             <AppLoaderWrapper duration={getLoaderDuration()} enabled={isLoaderEnabled()}>
-                <RouterProvider router={router} />
+                <RouterProvider router={router} future={{ v7_startTransition: true }} />
             </AppLoaderWrapper>
         </>
     );

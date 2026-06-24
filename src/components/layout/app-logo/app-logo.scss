@@ -1,4 +1,7 @@
 .app-header {
+    /* ensure header doesn't clip popovers */
+    overflow: visible;
+
     &__logo-container {
         display: flex;
         align-items: center;
@@ -16,9 +19,6 @@
             justify-content: flex-start;
         }
     }
-
-    /* ensure header doesn't clip popovers */
-    overflow: visible;
 
     // Deriv Insider Branding Styles
     .deriv-insider-branding {

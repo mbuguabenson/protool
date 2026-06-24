@@ -11,6 +11,30 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
+    // Lightweight diagnostics: log request method, url and masked headers
+    try {
+        const maskAuth = (h) => {
+            if (!h) return h;
+            try {
+                const parts = h.split(' ');
+                if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+                    const token = parts[1];
+                    const last = token.slice(-6);
+                    return `${parts[0]} ${token.length > 12 ? `${token.slice(0,6)}...${last}` : '***'}`;
+                }
+            } catch (e) {}
+            return h && h.length > 24 ? `${h.slice(0,8)}...${h.slice(-8)}` : h;
+        };
+
+        const loggedHeaders = Object.fromEntries(
+            Object.entries(req.headers || {}).map(([k, v]) => [k, k === 'authorization' ? maskAuth(v) : v])
+        );
+        console.log('[DerivWS Proxy] Incoming request:', req.method, req.url);
+        console.log('[DerivWS Proxy] Incoming headers (masked):', JSON.stringify(loggedHeaders));
+    } catch (e) {
+        console.warn('[DerivWS Proxy] Failed to log incoming headers', e);
+    }
+
     try {
         // Vercel may rewrite req.url to the function destination.
         // Try multiple sources to find the original request path.
