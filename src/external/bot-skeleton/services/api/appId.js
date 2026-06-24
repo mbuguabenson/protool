@@ -165,11 +165,27 @@ const isOidcSession = () => {
 
     // Filter out duplicates and empty strings
     const uniqueTokens = Array.from(new Set(tokens.filter(t => typeof t === 'string' && t.trim() !== '')));
+    const oauthFlowType = typeof window !== 'undefined' ? localStorage.getItem('oauth_flow_type') : null;
+    console.log('[appId.js] isOidcSession', { oauthFlowType, tokenCount: uniqueTokens.length });
+
+    // Respect an explicit oauth_flow_type set by other parts of the app
+    if (oauthFlowType === 'legacy') {
+        console.log('[appId.js] isOidcSession -> false due to explicit legacy oauth_flow_type');
+        return false;
+    }
+    if (oauthFlowType === 'modern') {
+        console.log('[appId.js] isOidcSession -> true due to explicit modern oauth_flow_type');
+        return true;
+    }
 
     if (uniqueTokens.length > 0) {
-        // If we have tokens, we check if any of them is an OIDC JWT.
-        // If yes, this is OIDC. If not, this is definitely legacy.
-        return uniqueTokens.some(t => t.startsWith('eyJ'));
+        const hasJwtToken = uniqueTokens.some(t => t.startsWith('eyJ'));
+        if (hasJwtToken) {
+            console.log('[appId.js] isOidcSession -> true based on JWT token presence');
+            return true;
+        }
+        console.log('[appId.js] isOidcSession -> false because only legacy tokens were found');
+        return false;
     }
 
     // 2. Fallback check for cookies and OAuth redirect indicators when no tokens are loaded yet
@@ -178,7 +194,10 @@ const isOidcSession = () => {
 
         // Hydra / Ory OIDC session cookies
         const hasHydraSession = cookies.some(c => c.startsWith('ory_') || c.startsWith('oauth_'));
-        if (hasHydraSession) return true;
+        if (hasHydraSession) {
+            console.log('[appId.js] isOidcSession -> true due to OIDC session cookies');
+            return true;
+        }
 
         const loggedStateCookie = cookies.find(c => c.startsWith('logged_state='));
         if (loggedStateCookie && loggedStateCookie.split('=')[1] === 'true') {
@@ -187,6 +206,7 @@ const isOidcSession = () => {
                 const hasLegacyUrlParams =
                     window.location.search.includes('acct1=') || window.location.hash.includes('acct1=');
                 if (!hasLegacyUrlParams) {
+                    console.log('[appId.js] isOidcSession -> true due to logged_state cookie');
                     return true;
                 }
             }
@@ -201,6 +221,7 @@ const isOidcSession = () => {
         const hasLegacyUrlParams = window.location.search.includes('acct1=') || window.location.hash.includes('acct1=');
 
         if ((hasCodeVerifier || isCallbackPath || hasOidcQueryParams) && !hasLegacyUrlParams) {
+            console.log('[appId.js] isOidcSession -> true due to PKCE/callback/query indicators');
             return true;
         }
     }
