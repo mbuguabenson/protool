@@ -36,7 +36,6 @@ export default async function handler(req, res) {
         }
 
         const oauth_client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
-        const legacy_app_id = process.env.DERIV_LEGACY_APP_ID || process.env.APP_ID || '113555';
 
         const redirect_uri =
             process.env.DERIV_REDIRECT_URI ||
@@ -96,9 +95,6 @@ export default async function handler(req, res) {
             setCookies.push(
                 `deriv_token_expires=${Date.now() + Number(tokenData.expires_in) * 1000}; ${cookieOpts.join('; ')}`
             );
-
-        // Store legacy App ID in the deriv_app_id cookie so bot-skeleton uses it for legacy WS connections
-        setCookies.push(`deriv_app_id=${encodeURIComponent(legacy_app_id)}; ${cookieOpts.join('; ')}`);
 
         setCookies.push(`oauth_code_verifier=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`);
         setCookies.push(`oauth_state=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`);
@@ -237,7 +233,6 @@ export default async function handler(req, res) {
             account_id: selectedAccount?.loginid || null,
             account_type: selectedAccount?.account_type || null,
             currency: selectedCurrency || null,
-            app_id: legacy_app_id || null,
             client_id: oauth_client_id || null,
             accounts,
         };

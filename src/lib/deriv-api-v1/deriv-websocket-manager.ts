@@ -15,7 +15,7 @@ interface ConnectionLog {
     timestamp: Date;
 }
 
-import { DERIV_CONFIG, DERIV_API, DERIV_LEGACY_APP_ID } from './deriv-config';
+import { DERIV_CONFIG, DERIV_API } from './deriv-config';
 import { extractLastDigit, calculateDecimalCount } from './digit-utils';
 
 export type ConnectionState =
@@ -131,8 +131,8 @@ export class DerivWebSocketManager {
         }
     }
 
-    private getActiveAppId(legacyOnly = false): string {
-        return legacyOnly ? DERIV_LEGACY_APP_ID : DERIV_CONFIG.OAUTH_CLIENT_ID;
+    private getActiveAppId(): string {
+        return DERIV_CONFIG.OAUTH_CLIENT_ID;
     }
 
     private currentWsUrl: string = DERIV_API.WEBSOCKET;
@@ -410,17 +410,6 @@ export class DerivWebSocketManager {
             return;
         }
 
-        const oauthFlowType = typeof window !== 'undefined' ? localStorage.getItem('oauth_flow_type') : null;
-
-        if (oauthFlowType !== 'modern') {
-            console.log(
-                `[v0] ${oauthFlowType || 'Default'} flow detected. Skipping REST handshake and going straight to direct WebSocket authorize.`
-            );
-            this.isOtpConnection = false;
-            await this.authorizeDirectly(token);
-            return;
-        }
-
         try {
             this.log('info', `Starting modern V1 Authorization for: ${token.substring(0, 5)}...`);
             const accounts = await this.getAccounts();
@@ -484,20 +473,19 @@ export class DerivWebSocketManager {
             }
             throw new Error('No suitable options accounts found for this token.');
         } catch (e) {
-            console.warn('[v0] Modern auth failed. Falling back to direct WebSocket authorize...', e);
             this.log(
-                'warning',
-                `Modern auth failed: ${e instanceof Error ? e.message : String(e)}. Falling back to direct WebSocket authorize.`
+                'error',
+                `Modern auth failed: ${e instanceof Error ? e.message : String(e)}. Authorization aborted.`
             );
-            this.isOtpConnection = false;
-            await this.authorizeDirectly(token);
+            this.isAuthorized = false;
+            this.setConnectionState('DISCONNECTED');
+            throw e instanceof Error ? e : new Error(String(e));
         }
     }
 
     private async authorizeDirectly(token: string): Promise<void> {
         try {
-            const legacyAppId = this.getActiveAppId(true);
-            const publicUrl = `${DERIV_API.WEBSOCKET_LEGACY}?app_id=${legacyAppId}`;
+            const publicUrl = DERIV_API.WEBSOCKET;
 
             if (
                 !this.isConnected() ||
@@ -507,7 +495,7 @@ export class DerivWebSocketManager {
                 await this.connect(publicUrl, true);
             }
 
-            console.log(`[v0] Sending authorize message over WebSocket with App ID ${legacyAppId}...`);
+            console.log(`[v0] Sending authorize message over WebSocket...`);
             const response = await this.sendAndWait({ authorize: token }, 20000);
 
             if (response.error) {

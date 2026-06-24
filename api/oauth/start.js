@@ -22,7 +22,7 @@ export default async function handler(req, res) {
         const query = req.query || {};
 
         // Use client_id passed as query or fallback to env var
-        const client_id = query.client_id || process.env.DERIV_OAUTH_CLIENT_ID || process.env.DERIV_LEGACY_APP_ID;
+        const client_id = query.client_id || process.env.DERIV_OAUTH_CLIENT_ID;
         const redirect_uri =
             query.redirect_uri ||
             process.env.DERIV_REDIRECT_URI ||
@@ -72,11 +72,6 @@ export default async function handler(req, res) {
                 params.set(key, String(value));
             }
         });
-
-        // Add legacy app_id if available
-        if (process.env.DERIV_LEGACY_APP_ID) {
-            params.set('app_id', String(process.env.DERIV_LEGACY_APP_ID));
-        }
 
         const authUrl = `https://auth.deriv.com/oauth2/auth?${params.toString()}`;
 

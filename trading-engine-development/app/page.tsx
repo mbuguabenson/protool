@@ -99,7 +99,7 @@ export default function DerivAnalysisApp() {
         return saved ? JSON.parse(saved) : [];
     });
     const globalContext = useGlobalTradingContext();
-    const { showTokenModal, submitApiToken, loginWithDeriv, loginWithDerivLegacy } = useDerivAuth();
+    const { showTokenModal, submitApiToken, loginWithDeriv } = useDerivAuth();
 
     const itemVariants: Variants = {
         hidden: { y: 15, opacity: 0 },
@@ -1045,13 +1045,7 @@ export default function DerivAnalysisApp() {
             />
 
             {/* API Token Modal */}
-            <ApiTokenModal
-                open={showTokenModal}
-                onSubmit={submitApiToken}
-                onOAuthLogin={handleOAuthLogin}
-                onLegacyOAuthLogin={loginWithDerivLegacy}
-                theme={theme}
-            />
+            <ApiTokenModal open={showTokenModal} onSubmit={submitApiToken} onOAuthLogin={handleOAuthLogin} theme={theme} />
         </div>
     );
 }

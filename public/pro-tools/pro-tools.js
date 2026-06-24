@@ -1,4 +1,4 @@
-const ENDPOINT = 'wss://ws.derivws.com/websockets/v3?app_id=1089';
+const ENDPOINT = 'wss://api.derivws.com/trading/v1/options/ws/public';
 let ws = null;
 let currentSymbol = null;
 const symbolMeta = new Map();

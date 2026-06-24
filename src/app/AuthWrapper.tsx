@@ -103,6 +103,15 @@ const restoreLoginFromServerSession = async () => {
             console.warn('Failed to store deriv accounts via service', e);
         }
         localStorage.setItem('authToken', sessionToken);
+        
+        // Store OIDC access token for REST API calls (DerivWS accounts fetch)
+        // This persists across page reloads since sessionStorage gets cleared
+        try {
+            localStorage.setItem('oidc_access_token', sessionToken);
+            console.log('[AuthWrapper] ✅ Stored oidc_access_token from server session:', sessionToken.slice(0, 20) + '...');
+        } catch (e) {
+            console.error('[AuthWrapper] ❌ Failed to store oidc_access_token from server session:', e);
+        }
 
         // CRITICAL: Set active_loginid BEFORE api_base.init() so it can use it
         if (preferredLoginId) {
@@ -505,6 +514,7 @@ export const AuthWrapper = () => {
                         // from emitting InvalidToken (which causes the infinite OAuth redirect loop)
                         Cookies.remove('logged_state', { path: '/' });
                         Cookies.set('logged_state', 'false', { path: '/', expires: 30 });
+                        localStorage.removeItem('oidc_access_token');
                     }
                 }
             }

@@ -228,14 +228,10 @@ function App() {
         // Diagnostic: log resolved OAuth config to help debug missing env vars
         try {
             const clientId = getConfiguredClientId();
-            const appId = getConfiguredAppId();
             const redirectUri = getAuthRedirectUri();
             const maskedClient = clientId ? `${clientId.slice(0, 4)}...${clientId.slice(-4)}` : 'not-configured';
-            const maskedApp = appId ? String(appId) : 'not-configured';
             // eslint-disable-next-line no-console
-            console.info(
-                `[OAuth Diagnostic] client_id: ${maskedClient}, app_id: ${maskedApp}, redirect_uri: ${redirectUri}`
-            );
+            console.info(`[OAuth Diagnostic] client_id: ${maskedClient}, redirect_uri: ${redirectUri}`);
         } catch (e) {
             // ignore diagnostics failures
         }

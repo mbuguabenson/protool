@@ -11,7 +11,6 @@ interface ApiTokenModalProps {
     open: boolean;
     onSubmit: (token: string) => void;
     onOAuthLogin?: () => void;
-    onLegacyOAuthLogin?: () => void;
     theme?: 'light' | 'dark';
 }
 
@@ -19,7 +18,6 @@ export function ApiTokenModal({
     open,
     onSubmit,
     onOAuthLogin,
-    onLegacyOAuthLogin,
     theme = 'dark',
 }: ApiTokenModalProps) {
     const [tokenInput, setTokenInput] = useState('');
@@ -54,24 +52,7 @@ export function ApiTokenModal({
         }
     };
 
-    const handleLegacyOAuthClick = () => {
-        console.log('[v0] Legacy OAuth login button clicked (App ID: 110211)');
-        if (typeof window !== 'undefined' && window.location.hostname.includes('vusercontent.net')) {
-            alert("OAuth login is not available in v0's preview environment.");
-            return;
-        }
-
-        if (onLegacyOAuthLogin) {
-            try {
-                onLegacyOAuthLogin();
-            } catch (error) {
-                console.error('[v0] Legacy OAuth login error:', error);
-                alert(`Legacy OAuth login failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-            }
-        } else if (onOAuthLogin) {
-            onOAuthLogin();
-        }
-    };
+    // Legacy OAuth option removed — modern OAuth enforced via `onOAuthLogin`
 
     const isDark = theme === 'dark';
 
@@ -154,43 +135,7 @@ export function ApiTokenModal({
                         </Button>
                     </div>
 
-                    {/* Secondary Option: Legacy OAuth */}
-                    <div
-                        className={`p-4 rounded-2xl border transition-all duration-300 ${
-                            isDark
-                                ? 'bg-blue-500/[0.02] border-blue-500/10 hover:border-blue-500/20'
-                                : 'bg-blue-50/30 border-blue-100 hover:border-blue-200'
-                        }`}
-                    >
-                        <div className='flex items-center justify-between mb-2'>
-                            <span
-                                className={`text-[9px] font-black uppercase tracking-wider flex items-center gap-1 ${isDark ? 'text-blue-400' : 'text-blue-700'}`}
-                            >
-                                <Clock className='w-3 h-3' /> Legacy Protocol
-                            </span>
-                            <span className={`text-[9px] font-bold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                                App ID: 110211
-                            </span>
-                        </div>
-                        <p
-                            className={`text-[11px] leading-normal mb-3 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}
-                        >
-                            Access via standard Deriv API scopes. Useful if your account requires legacy App ID
-                            validation.
-                        </p>
-                        <Button
-                            onClick={handleLegacyOAuthClick}
-                            variant='outline'
-                            className={`w-full h-10 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-300 ${
-                                isDark
-                                    ? 'border-blue-500/30 text-blue-300 hover:bg-blue-500/10 hover:border-blue-500/50 bg-transparent'
-                                    : 'border-blue-200 text-blue-700 hover:bg-blue-50'
-                            }`}
-                        >
-                            <LogIn className='w-4 h-4 mr-2' />
-                            Sign in via Legacy App
-                        </Button>
-                    </div>
+                    {/* Legacy OAuth option removed — modern OAuth enforced */}
 
                     {/* Divider */}
                     <div className='flex items-center gap-3 py-1'>

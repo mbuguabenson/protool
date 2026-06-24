@@ -31,7 +31,6 @@ export default async function handler(req, res) {
     try {
         const cookies = parseCookies(req.headers.cookie || '');
         const refresh_token = cookies.deriv_refresh_token;
-        const app_id = cookies.deriv_app_id || process.env.DERIV_LEGACY_APP_ID;
 
         if (!refresh_token) {
             return res.status(400).json({

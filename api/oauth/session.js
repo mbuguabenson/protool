@@ -20,26 +20,21 @@ export default async function handler(req, res) {
     try {
         const cookies = parseCookies(req.headers.cookie || '');
         const access_token = cookies.deriv_access_token;
-        const app_id = cookies.deriv_app_id || process.env.DERIV_LEGACY_APP_ID;
         const stored_selected_loginid = cookies.deriv_selected_loginid;
 
         // Alphanumeric client ID required for REST calls to https://api.derivws.com
         const oauth_client_id = process.env.DERIV_OAUTH_CLIENT_ID || process.env.CLIENT_ID || '33yStbGyLdNdqAyCuDk1d';
-        // Numeric legacy app ID required for frontend/bot-skeleton websocket connection parameter
-        const legacy_app_id = app_id || process.env.DERIV_LEGACY_APP_ID || '113555';
 
         console.log(
             '[Session] Restoring session. Token present:',
             !!access_token,
-            'Legacy App ID:',
-            legacy_app_id,
             'OAuth Client ID:',
             oauth_client_id
         );
 
         if (!access_token) {
             console.log('[Session] No access token found in cookies. Returning logged_in: false');
-            return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+            return res.status(200).json({ logged_in: false });
         }
 
         // Check if the access token has expired
@@ -84,19 +79,19 @@ export default async function handler(req, res) {
                                 console.warn(
                                     '[Session] Token refresh response missing access_token. Returning logged_in: false.'
                                 );
-                                return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+                                return res.status(200).json({ logged_in: false });
                             }
                         } else {
                             console.warn('[Session] Token refresh failed. Returning logged_in: false.');
-                            return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+                            return res.status(200).json({ logged_in: false });
                         }
                     } catch (refreshErr) {
                         console.error('[Session] Token refresh error:', refreshErr);
-                        return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+                        return res.status(200).json({ logged_in: false });
                     }
                 } else {
                     console.log('[Session] Access token expired and no refresh token. Returning logged_in: false.');
-                    return res.status(200).json({ logged_in: false, app_id: legacy_app_id });
+                    return res.status(200).json({ logged_in: false });
                 }
             }
         }
@@ -201,11 +196,11 @@ export default async function handler(req, res) {
 
         return res.status(200).json({
             logged_in: true,
+            access_token,
             account_id: selectedAccount?.loginid || selectedLoginId || null,
             account_type: selectedAccount?.account_type || null,
             currency: selectedAccount?.currency || null,
-            app_id: legacy_app_id || null,
-            access_token,
+            client_id: oauth_client_id || null,
             accounts,
         });
     } catch (err) {

@@ -15,7 +15,6 @@
  */
 
 export const DERIV_APP_ID = process.env.NEXT_PUBLIC_DERIV_APP_ID || '110211'; // Modern Options V1 App ID (Numeric)
-export const DERIV_LEGACY_APP_ID = process.env.NEXT_PUBLIC_DERIV_LEGACY_APP_ID || '110211'; // Legacy App ID for backward compatibility
 export const OAUTH_CLIENT_ID = process.env.NEXT_PUBLIC_DERIV_OAUTH_CLIENT_ID || '33tdJCamBVncjRj9m3WFe'; // OAuth App ID (same as original DERIV_APP_ID)
 
 // Get redirect URL based on environment

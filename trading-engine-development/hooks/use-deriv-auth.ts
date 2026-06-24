@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { DerivWebSocketManager } from '@/lib/deriv-websocket-manager';
-import { DERIV_APP_ID, DERIV_LEGACY_APP_ID, OAUTH_CLIENT_ID, DERIV_API, DERIV_REDIRECT_URL } from '@/lib/deriv-config';
+import { DERIV_APP_ID, OAUTH_CLIENT_ID, DERIV_API, DERIV_REDIRECT_URL } from '@/lib/deriv-config';
 import {
     authLog,
     normalizeAuthorizeResponse,
@@ -507,7 +507,6 @@ export function useDerivAuth() {
             sessionStorage.setItem('oauth_state', state);
 
             // Build the standard authorization URL with all required PKCE parameters
-            // app_id MUST be the numeric legacy ID (110211) — string IDs cause "missing app_id" errors
             const params = new URLSearchParams({
                 response_type: 'code',
                 client_id: OAUTH_CLIENT_ID, // Modern OAuth ID
@@ -516,7 +515,6 @@ export function useDerivAuth() {
                 state: state,
                 code_challenge: codeChallenge,
                 code_challenge_method: 'S256',
-                app_id: DERIV_LEGACY_APP_ID, // Numeric App ID (110211) — required by Deriv auth server
             });
 
             const oauthUrl = `https://auth.deriv.com/oauth2/auth?${params.toString()}`;
@@ -528,57 +526,7 @@ export function useDerivAuth() {
         }
     };
 
-    /**
-     * Legacy OAuth Login Flow (App ID: 110211)
-     *
-     * Uses auth.deriv.com/oauth2/auth with `app_id` routing so Deriv can
-     * route legacy users to the legacy API platform while preserving the
-     * standard PKCE code exchange flow.
-     */
-    const loginWithDerivLegacy = async () => {
-        console.log('[v0] 🔐 Starting Legacy OAuth login flow (App ID: 110211)...');
-        if (typeof window === 'undefined') return;
-
-        try {
-            localStorage.setItem('oauth_flow_type', 'legacy');
-
-            const array = crypto.getRandomValues(new Uint8Array(64));
-            const codeVerifier = Array.from(array)
-                .map(v => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'[v % 66])
-                .join('');
-
-            const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
-            const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
-
-            const state = crypto
-                .getRandomValues(new Uint8Array(16))
-                .reduce((s, b) => s + b.toString(16).padStart(2, '0'), '');
-
-            sessionStorage.setItem('pkce_code_verifier', codeVerifier);
-            sessionStorage.setItem('oauth_state', state);
-
-            const params = new URLSearchParams({
-                response_type: 'code',
-                client_id: OAUTH_CLIENT_ID,
-                redirect_uri: DERIV_REDIRECT_URL,
-                scope: 'trade account_manage',
-                state,
-                code_challenge: codeChallenge,
-                code_challenge_method: 'S256',
-                app_id: DERIV_LEGACY_APP_ID,
-            });
-
-            const oauthUrl = `https://auth.deriv.com/oauth2/auth?${params.toString()}`;
-
-            console.log('[v0] 🔐 Redirecting to Deriv Legacy OAuth URL:', oauthUrl);
-            window.location.href = oauthUrl;
-        } catch (error) {
-            console.error('[v0] ❌ Legacy OAuth login error:', error);
-        }
-    };
+    // Legacy OAuth login flow removed — modern OAuth (client_id + PKCE) enforced.
 
     const requestLogin = () => {
         loginWithDeriv();
@@ -635,7 +583,6 @@ export function useDerivAuth() {
         isInitializing,
         isAuthenticated: isLoggedIn,
         loginWithDeriv,
-        loginWithDerivLegacy,
         requestLogin,
         showApprovalModal,
         logout,

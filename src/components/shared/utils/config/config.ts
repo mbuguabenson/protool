@@ -70,7 +70,7 @@ export const getConfiguredClientId = () =>
     process.env.VITE_OAUTH_CLIENT_ID ||
     localStorage.getItem('configured_client_id') ||
     brandConfig.oauth?.client_id ||
-    String(getConfiguredAppId() || '');
+    null;
 
 const getOAuthBaseUrl = () =>
     process.env.AUTH_BASE_URL ||
@@ -393,14 +393,13 @@ export const getDebugServiceWorker = () => {
 
 export const generateOAuthURL = async (prompt?: string) => {
     const configured_client_id = getConfiguredClientId();
-    const configured_app_id = getConfiguredAppId();
     const preferred_account =
         new URLSearchParams(window.location.search).get('account') ||
         sessionStorage.getItem('query_param_currency') ||
         '';
 
-    if (!configured_client_id && !configured_app_id) {
-        throw new Error('CLIENT_ID or APP_ID is required for OAuth login');
+    if (!configured_client_id) {
+        throw new Error('CLIENT_ID is required for OAuth login');
     }
 
     const oauthBaseUrl = getOAuthBaseUrl().replace(/\/$/, '');
@@ -418,10 +417,7 @@ export const generateOAuthURL = async (prompt?: string) => {
     sessionStorage.setItem(OAUTH_CODE_VERIFIER_TIMESTAMP_KEY, timestamp);
 
     original_url.searchParams.set('response_type', 'code');
-    const final_client_id = configured_client_id || String(configured_app_id || '');
-    if (final_client_id) {
-        original_url.searchParams.set('client_id', final_client_id);
-    }
+    original_url.searchParams.set('client_id', configured_client_id);
     original_url.searchParams.set('redirect_uri', getAuthRedirectUri());
     original_url.searchParams.set('scope', getOAuthScope());
     original_url.searchParams.set('state', state);
@@ -430,12 +426,6 @@ export const generateOAuthURL = async (prompt?: string) => {
 
     if (preferred_account) {
         original_url.searchParams.set('account', preferred_account);
-    }
-
-    // Optional: include legacy app_id for routing users on the Legacy Deriv API platform.
-    // This allows client_id-based login to still route through the legacy app id when configured.
-    if (configured_app_id) {
-        original_url.searchParams.set('app_id', String(configured_app_id));
     }
 
     if (prompt) {

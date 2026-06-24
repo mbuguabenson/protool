@@ -11,8 +11,7 @@ export default async function handler(req, res) {
             body.client_id ||
             process.env.DERIV_OAUTH_CLIENT_ID ||
             process.env.OAUTH_CLIENT_ID ||
-            process.env.CLIENT_ID ||
-            process.env.DERIV_LEGACY_APP_ID;
+            process.env.CLIENT_ID;
         const redirect_uri =
             body.redirect_uri ||
             process.env.DERIV_REDIRECT_URI ||
@@ -83,12 +82,6 @@ export default async function handler(req, res) {
             setCookies.push(
                 `deriv_refresh_token=${encodeURIComponent(tokenData.refresh_token)}; ${cookieOpts.join('; ')}; Max-Age=604800`
             );
-        }
-
-        const appId =
-            process.env.DERIV_LEGACY_APP_ID || process.env.APP_ID || process.env.OAUTH_LEGACY_APP_ID || '113555';
-        if (appId) {
-            setCookies.push(`deriv_app_id=${encodeURIComponent(appId)}; ${cookieOpts.join('; ')}`);
         }
 
         setCookies.push(`logged_state=true; Path=/; SameSite=Lax${isProd ? '; Secure' : ''}`);

@@ -42,7 +42,6 @@ export default async function handler(req, res) {
             `deriv_refresh_token=; ${cookieString}; HttpOnly; SameSite=Strict`,
             `deriv_token_expires_at=; ${cookieString}; HttpOnly; SameSite=Strict`,
             `deriv_selected_account=; ${cookieString}; HttpOnly; SameSite=Strict`,
-            `deriv_app_id=; ${cookieString}`,
             `logged_state=; ${cookieString}`,
             `oauth_code_verifier=; ${cookieString}; HttpOnly; SameSite=Strict`,
             `oauth_state=; ${cookieString}; HttpOnly; SameSite=Strict`,

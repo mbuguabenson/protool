@@ -99,7 +99,7 @@ describe('auth config helpers', () => {
         expect(localStorage.getItem('config.app_id')).toBe('987654');
     });
 
-    it('includes optional app_id when both client_id and app_id are configured', async () => {
+    it('does not include app_id when only client_id is used for OAuth', async () => {
         process.env.CLIENT_ID = 'client-123';
         process.env.APP_ID = '246810';
 
@@ -107,7 +107,13 @@ describe('auth config helpers', () => {
         const parsedUrl = new URL(oauthUrl);
 
         expect(parsedUrl.searchParams.get('client_id')).toBe('client-123');
-        expect(parsedUrl.searchParams.get('app_id')).toBe('246810');
+        expect(parsedUrl.searchParams.get('app_id')).toBeNull();
+    });
+
+    it('throws when no client_id is configured', async () => {
+        process.env.APP_ID = '246810';
+
+        await expect(generateOAuthURL()).rejects.toThrow('CLIENT_ID is required for OAuth login');
     });
 
     it('returns the current origin as the auth callback URL', () => {

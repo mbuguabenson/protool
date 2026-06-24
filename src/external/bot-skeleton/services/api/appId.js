@@ -1,4 +1,4 @@
-import { getAppId, getSocketURL } from '@/components/shared';
+import { getAppId } from '@/components/shared';
 import { website_name } from '@/utils/site-config';
 import DerivAPIBasic from '@deriv/deriv-api/dist/DerivAPIBasic';
 import { getInitialLanguage } from '@deriv-com/translations';
@@ -116,9 +116,14 @@ const APP_ID_SWITCHING_DISABLED = true;
 // New Deriv Trading API public WebSocket endpoint (no app_id needed - OIDC path)
 const DERIVWS_PUBLIC_WS = 'wss://api.derivws.com/trading/v1/options/ws/public';
 
+const isJwtToken = token => typeof token === 'string' && token.startsWith('eyJ');
+const isModernToken = token => {
+    if (typeof token !== 'string' || token.trim() === '') return false;
+    return isJwtToken(token) || localStorage.getItem('oauth_flow_type') === 'modern';
+};
+
 /**
- * Detect if the current auth token is an OIDC JWT (not a legacy short token).
- * OIDC JWTs always start with 'eyJ'. Legacy tokens are short alphanumeric strings.
+ * Detect if the current auth token is an OIDC session.
  */
 const isOidcSession = () => {
     // 1. Gather all possible client-side tokens to check if they are OIDC JWTs (start with 'eyJ')
@@ -166,6 +171,12 @@ const isOidcSession = () => {
     // Filter out duplicates and empty strings
     const uniqueTokens = Array.from(new Set(tokens.filter(t => typeof t === 'string' && t.trim() !== '')));
     const oauthFlowType = typeof window !== 'undefined' ? localStorage.getItem('oauth_flow_type') : null;
+    const isCallbackPath = typeof window !== 'undefined' && window.location.pathname === '/callback';
+    const hasOidcQueryParams =
+        typeof window !== 'undefined' &&
+        (window.location.search.includes('code=ory_') || window.location.search.includes('scope=trade'));
+    const hasOidcCookie =
+        typeof document !== 'undefined' && document.cookie.includes('deriv_access_token');
     console.log('[appId.js] isOidcSession', { oauthFlowType, tokenCount: uniqueTokens.length });
 
     // Respect an explicit oauth_flow_type set by other parts of the app
@@ -174,8 +185,14 @@ const isOidcSession = () => {
         return false;
     }
     if (oauthFlowType === 'modern') {
-        console.log('[appId.js] isOidcSession -> true due to explicit modern oauth_flow_type');
-        return true;
+        const hasAuthInfo = !!OAuthTokenExchangeService.getAccessToken();
+        if (hasAuthInfo || hasOidcCookie || isCallbackPath || hasOidcQueryParams) {
+            console.log('[appId.js] isOidcSession -> true due to explicit modern oauth_flow_type with active OIDC evidence');
+            return true;
+        }
+        console.warn(
+            '[appId.js] isOidcSession -> modern oauth_flow_type set but no current authenticated OIDC token/cookie detected; deferring to fallback logic'
+        );
     }
 
     if (uniqueTokens.length > 0) {
@@ -237,36 +254,10 @@ const isOidcSession = () => {
  * @param {number} specificAppId - Optional specific app_id to use for legacy connections.
  */
 export const generateDerivApiInstance = (specificAppId = null) => {
-    const cleanedServer = getSocketURL().replace(/[^a-zA-Z0-9.]/g, '');
-    const requestedAppId = specificAppId !== null ? specificAppId : getAppId();
-    const appId =
-        currentConnectionAppId !== null && APP_ID_SWITCHING_DISABLED && specificAppId === null
-            ? currentConnectionAppId
-            : requestedAppId;
-    const cleanedAppId = appId?.toString()?.replace?.(/[^a-zA-Z0-9]/g, '') ?? appId?.toString();
-
-    // Store the app_id for legacy compatibility tracking
-    if (currentConnectionAppId === null || specificAppId !== null) {
-        currentConnectionAppId = appId;
-    }
-
-    // Choose WebSocket URL based on auth type:
-    // - OIDC JWT: use modern api.derivws.com public endpoint (no app_id in URL)
-    // - Legacy token: use traditional ws.derivws.com with numeric app_id
-    const oidcSession = isOidcSession();
-    let socket_url;
-
-    if (oidcSession) {
-        socket_url = DERIVWS_PUBLIC_WS;
-        console.log(`🔗 [WEBSOCKET] OIDC session detected — connecting to modern Deriv Trading API`);
-    } else {
-        socket_url = `wss://${cleanedServer}/websockets/v3?app_id=${cleanedAppId}&l=${getInitialLanguage()}&brand=${website_name.toLowerCase()}`;
-        if (specificAppId === null) {
-            console.log(`🔗 [WEBSOCKET] Legacy session — connecting with App ID ${appId}`);
-        } else {
-            console.log(`🔗 [WEBSOCKET] Legacy session — connecting with specific App ID ${appId}`);
-        }
-    }
+    // Always use the modern Deriv Trading API public WebSocket endpoint.
+    // Legacy websocket app_id routes are no longer supported.
+    const socket_url = DERIVWS_PUBLIC_WS;
+    console.log(`🔗 [WEBSOCKET] Connecting to modern Deriv Trading API: ${socket_url}`);
 
     const delegating_socket = new DelegatingWebSocket(socket_url);
     const deriv_api = new DerivAPIBasic({
@@ -276,9 +267,11 @@ export const generateDerivApiInstance = (specificAppId = null) => {
 
     const originalAuthorize = deriv_api.authorize.bind(deriv_api);
     deriv_api.authorize = async token => {
-        if (token && token.startsWith('eyJ')) {
+        const oauthFlowType = typeof window !== 'undefined' ? localStorage.getItem('oauth_flow_type') : null;
+        const shouldInterceptOidc = token && (isJwtToken(token) || oauthFlowType === 'modern');
+        if (shouldInterceptOidc) {
             const targetAccountId = localStorage.getItem('active_loginid') || '';
-            console.log(`🔑 [appId.js] Intercepted authorize call for OIDC JWT. Target account: ${targetAccountId}`);
+            console.log(`🔑 [appId.js] Intercepted authorize call for OIDC token. Target account: ${targetAccountId}`);
 
             let accounts = [];
             try {
@@ -416,22 +409,39 @@ export const V2GetActiveToken = () => {
         console.warn('[V2GetActiveToken] ⚠️ No demo token found for special account', showAsCR, 'using fallback');
     }
 
-    // Prefer token from centralized OAuthTokenExchangeService
+    // Prefer token from centralized OAuthTokenExchangeService (checks sessionStorage first)
     try {
         const oauthToken = OAuthTokenExchangeService.getAccessToken();
         if (oauthToken) {
-            console.log('[V2GetActiveToken] Using OAuthTokenExchangeService token.',
-                oauthToken.startsWith('eyJ') ? 'OIDC JWT' : 'legacy token');
+            console.log(
+                '[V2GetActiveToken] Using OAuthTokenExchangeService token.',
+                oauthToken.startsWith('eyJ') ? 'OIDC JWT' : 'opaque/legacy token'
+            );
             return oauthToken;
         }
     } catch (e) {
         // Ignore and fallback
     }
 
+    // After page reload, sessionStorage is cleared, so check for persisted OIDC token
+    const oidcToken = typeof window !== 'undefined' ? localStorage.getItem('oidc_access_token') : null;
+    if (oidcToken && oidcToken !== 'null') {
+        console.log(
+            '[V2GetActiveToken] ✅ Using persisted localStorage oidc_access_token.',
+            oidcToken.slice(0, 20) + '...',
+            oidcToken.startsWith('eyJ') ? 'OIDC JWT' : 'opaque/legacy token'
+        );
+        return oidcToken;
+    } else if (oidcToken === null) {
+        console.warn('[V2GetActiveToken] ⚠️ No oidc_access_token in localStorage');
+    }
+
     const authToken = localStorage.getItem('authToken');
     if (authToken && authToken !== 'null') {
-        console.log('[V2GetActiveToken] Using localStorage authToken.',
-            authToken.startsWith('eyJ') ? 'OIDC JWT' : 'legacy token');
+        console.log(
+            '[V2GetActiveToken] Using localStorage authToken.',
+            authToken.startsWith('eyJ') ? 'OIDC JWT' : 'opaque/legacy token'
+        );
         return authToken;
     }
 
@@ -441,6 +451,7 @@ export const V2GetActiveToken = () => {
         return legacyToken;
     }
 
+    console.warn('[V2GetActiveToken] ⚠️ NO TOKEN FOUND in any storage location!');
     return null;
 };
 

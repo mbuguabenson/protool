@@ -70,6 +70,7 @@ export class OAuthTokenExchangeService {
 
     static clearAuthInfo(): void {
         sessionStorage.removeItem('auth_info');
+        localStorage.removeItem('oidc_access_token');
     }
 
     static isAuthenticated(): boolean {
@@ -138,13 +139,18 @@ export class OAuthTokenExchangeService {
                 if (data.refresh_token) authInfo.refresh_token = data.refresh_token;
 
                 sessionStorage.setItem('auth_info', JSON.stringify(authInfo));
+                console.log('[OAuth] ✅ Token exchange successful. Storing tokens...');
 
-                // NOTE: Do NOT store the OIDC access_token in localStorage as 'authToken'.
-                // The Deriv WebSocket API only accepts legacy short API tokens — not JWTs.
-                // The server has already stored the access_token in the HttpOnly
-                // 'deriv_access_token' cookie (via /api/token). On the next page load,
-                // AuthWrapper will detect this cookie via /api/oauth/session and restore
-                // the session properly (fetching accounts from the DerivWS REST API).
+                // CRITICAL: Also store access_token in localStorage so it persists across page reloads.
+                // This ensures V2GetActiveToken() can retrieve the token even after sessionStorage is cleared.
+                // The server stores the token in an HttpOnly cookie, but we need it in localStorage for
+                // REST API calls (DerivWS accounts fetch) that require the Authorization header.
+                try {
+                    localStorage.setItem('oidc_access_token', data.access_token);
+                    console.log('[OAuth] ✅ Stored oidc_access_token in localStorage:', data.access_token.slice(0, 20) + '...');
+                } catch (e) {
+                    console.error('[OAuth] ❌ Failed to store oidc_access_token in localStorage:', e);
+                }
             }
 
             return data;
